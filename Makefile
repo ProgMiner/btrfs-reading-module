@@ -21,6 +21,7 @@ all: build
 
 clean:
 	@rm -vrf $(BUILDPATH) 2> /dev/null; true
+	@rm -v $(TARGET) 2> /dev/null; true
 
 build: $(TARGET)
 

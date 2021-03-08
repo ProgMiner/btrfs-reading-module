@@ -1,3 +1,4 @@
+#define _LARGEFILE64_SOURCE
 #define FUSE_USE_VERSION 26
 
 #include <fuse.h>
@@ -5,9 +6,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "btrfs.h"
 
+static int btrfs_fd;
+static void * btrfs_data = NULL;
+static off64_t btrfs_data_length;
 static struct btrfs * btrfs = NULL;
 
 static int btrfs_fuse_getattr(const char * path, struct stat * stbuf) {
@@ -75,13 +82,33 @@ static int btrfs_fuse_read(
     return size;
 }
 
+static void btrfs_fuse_destroy(void * private_data) {
+    (void) private_data;
+
+    btrfs_delete(btrfs);
+
+    munmap(btrfs_data, btrfs_data_length);
+    close(btrfs_fd);
+}
+
 static struct fuse_operations btrfs_fuse_oper = {
     .getattr    = btrfs_fuse_getattr,
     .readdir    = btrfs_fuse_readdir,
     .open       = btrfs_fuse_open,
     .read       = btrfs_fuse_read,
+    .destroy    = btrfs_fuse_destroy,
 };
 
 int main(int argc, char * argv[]) {
+    btrfs_fd = open("testfs", 0, O_RDONLY);
+    btrfs_data_length = lseek64(btrfs_fd, 0, SEEK_END);
+
+    if (btrfs_data_length < 0) {
+        return errno;
+    }
+
+    btrfs_data = mmap(NULL, btrfs_data_length, PROT_READ, MAP_PRIVATE, btrfs_fd, 0);
+    btrfs = btrfs_openfs(btrfs_data);
+
     return fuse_main(argc, argv, &btrfs_fuse_oper, NULL);
 }
