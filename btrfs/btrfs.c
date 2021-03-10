@@ -7,11 +7,6 @@
 #include "btrfs_low.h"
 
 
-struct btrfs {
-    void * data;
-    struct btrfs_super_block * sb;
-};
-
 struct btrfs * btrfs_openfs(void * data) {
     struct btrfs * btrfs = malloc(sizeof(btrfs));
 
