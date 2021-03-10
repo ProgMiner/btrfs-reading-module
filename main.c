@@ -110,5 +110,13 @@ int main(int argc, char * argv[]) {
     btrfs_data = mmap(NULL, btrfs_data_length, PROT_READ, MAP_PRIVATE, btrfs_fd, 0);
     btrfs = btrfs_openfs(btrfs_data);
 
-    return fuse_main(argc, argv, &btrfs_fuse_oper, NULL);
+    /// TODO remove
+
+    (void) btrfs_fuse_oper;
+    btrfs_fuse_destroy(NULL);
+    return 0;
+
+    /// TODO /remove
+
+    // return fuse_main(argc, argv, &btrfs_fuse_oper, NULL);
 }

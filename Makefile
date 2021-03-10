@@ -8,8 +8,8 @@ CFLAGS = -std=gnu11 -pedantic-errors -Wall -Werror $(FUSE_CFLAGS) -g -O0 # -O2
 LFLAGS = $(FUSE_LFLAGS)
 
 BUILDPATH = build
-SOURCES = main.c btrfs.c
-HEADERS = btrfs.h
+SOURCES = main.c btrfs.c btrfs_low.c
+HEADERS = btrfs.h btrfs_low.h
 TARGET = lab1
 
 OBJECTS = $(SOURCES:%.c=$(BUILDPATH)/%.o)

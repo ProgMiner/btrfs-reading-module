@@ -1,18 +1,33 @@
 #include "btrfs.h"
 
+#include <linux/types.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
+#include "btrfs_low.h"
+
 
 struct btrfs {
     void * data;
+    struct btrfs_super_block * sb;
 };
 
 struct btrfs * btrfs_openfs(void * data) {
     struct btrfs * btrfs = malloc(sizeof(btrfs));
 
+    if (!btrfs) {
+        return NULL;
+    }
+
     btrfs->data = data;
+    btrfs->sb = btrfs_low_find_superblock(data);
+
+    if (!btrfs->sb) {
+        btrfs_delete(btrfs);
+        return NULL;
+    }
 
     return btrfs;
 }
