@@ -1,8 +1,35 @@
 #pragma once
 
 #include <stdint.h>
+#include <byteswap.h>
 
-#include <linux/types.h>
+
+#define __force
+#define __bitwise
+
+/* Macros to generate set/get funcs for the struct fields
+ * assume there is a lefoo_to_cpu for every type, so lets make a simple
+ * one for u8:
+ */
+#define le8_to_cpu(v) (v)
+#define cpu_to_le8(v) (v)
+#define __le8 u8
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define cpu_to_le64(x) ((__force __le64)(u64)(bswap_64(x)))
+#define le64_to_cpu(x) ((__force u64)(__le64)(bswap_64(x)))
+#define cpu_to_le32(x) ((__force __le32)(u32)(bswap_32(x)))
+#define le32_to_cpu(x) ((__force u32)(__le32)(bswap_32(x)))
+#define cpu_to_le16(x) ((__force __le16)(u16)(bswap_16(x)))
+#define le16_to_cpu(x) ((__force u16)(__le16)(bswap_16(x)))
+#else
+#define cpu_to_le64(x) ((__force __le64)(u64)(x))
+#define le64_to_cpu(x) ((__force u64)(__le64)(x))
+#define cpu_to_le32(x) ((__force __le32)(u32)(x))
+#define le32_to_cpu(x) ((__force u32)(__le32)(x))
+#define cpu_to_le16(x) ((__force __le16)(u16)(x))
+#define le16_to_cpu(x) ((__force u16)(__le16)(x))
+#endif
 
 
 /* 32 bytes in various csum fields */
@@ -29,7 +56,22 @@
 #define BTRFS_SUPER_INFO_OFFSET 0x00010000
 
 
+typedef int8_t  s8;
 typedef uint8_t u8;
+typedef int16_t  s16;
+typedef uint16_t u16;
+typedef int32_t  s32;
+typedef uint32_t u32;
+typedef int64_t  s64;
+typedef uint64_t u64;
+
+typedef u16 __bitwise __le16;
+typedef u16 __bitwise __be16;
+typedef u32 __bitwise __le32;
+typedef u32 __bitwise __be32;
+typedef u64 __bitwise __le64;
+typedef u64 __bitwise __be64;
+
 
 struct btrfs_dev_item {
     /* the internal btrfs device id */
@@ -164,6 +206,39 @@ struct btrfs_super_block {
     u8 sys_chunk_array[BTRFS_SYSTEM_CHUNK_ARRAY_SIZE];
     struct btrfs_root_backup super_roots[BTRFS_NUM_BACKUP_ROOTS];
 } __attribute__ ((__packed__));
+
+/*
+ * the key defines the order in the tree, and so it also defines (optimal)
+ * block layout.  objectid corresponds to the inode number.  The flags
+ * tells us things about the object, and is a kind of stream selector.
+ * so for a given inode, keys with flags of 1 might refer to the inode
+ * data, flags of 2 may point to file data in the btree and flags == 3
+ * may point to extents.
+ *
+ * offset is the starting byte offset for this key in the stream.
+ *
+ * btrfs_disk_key is in disk byte order.  struct btrfs_key is always
+ * in cpu native order.  Otherwise they are identical and their sizes
+ * should be the same (ie both packed)
+ */
+struct btrfs_disk_key {
+	__le64 objectid;
+	u8 type;
+	__le64 offset;
+} __attribute__ ((__packed__));
+
+struct btrfs_key {
+	u64 objectid;
+	u8 type;
+	u64 offset;
+} __attribute__ ((__packed__));
+
+
+static inline void btrfs_disk_key_to_cpu(struct btrfs_key * cpu, struct btrfs_disk_key * disk) {
+    cpu->offset = le64_to_cpu(disk->offset);
+    cpu->type = disk->type;
+    cpu->objectid = le64_to_cpu(disk->objectid);
+}
 
 
 struct btrfs_super_block * btrfs_low_find_superblock(void * data);
