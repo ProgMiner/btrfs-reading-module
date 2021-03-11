@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "../types.h"
 #include "btrfs_stripe.h"
 
@@ -36,3 +38,20 @@ struct btrfs_chunk {
     /* the first of one or more stripes that map to device extents */
     struct btrfs_stripe stripe;
 } __attribute__ ((__packed__));
+
+static inline u64 btrfs_chunk_length(struct btrfs_chunk * chunk) {
+    return le64_to_cpu(chunk->length);
+}
+
+static inline u64 btrfs_chunk_stripe_len(struct btrfs_chunk * chunk) {
+    return le64_to_cpu(chunk->stripe_len);
+}
+
+static inline u16 btrfs_chunk_num_stripes(struct btrfs_chunk * chunk) {
+    return le16_to_cpu(chunk->num_stripes);
+}
+
+static inline size_t btrfs_chunk_size(struct btrfs_chunk * chunk) {
+    return sizeof(struct btrfs_chunk) + sizeof(struct btrfs_stripe)
+            * (btrfs_chunk_num_stripes(chunk) - 1);
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../types.h"
+#include "../btrfs_consts.h"
 
 
 /*
@@ -22,3 +23,7 @@ struct btrfs_stripe {
      */
 	u8 dev_uuid[BTRFS_UUID_SIZE];
 } __attribute__ ((__packed__));
+
+static inline u64 btrfs_stripe_offset(struct btrfs_stripe * stripe) {
+    return le64_to_cpu(stripe->offset);
+}

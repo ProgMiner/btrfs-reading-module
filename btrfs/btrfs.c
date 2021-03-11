@@ -18,14 +18,17 @@ struct btrfs * btrfs_openfs(void * data) {
     btrfs->sb = btrfs_low_find_superblock(data);
 
     if (!btrfs->sb) {
-        btrfs_delete(btrfs);
+        free(btrfs);
         return NULL;
     }
+
+    btrfs->chunk_list = btrfs_read_sys_array(btrfs->sb);
 
     return btrfs;
 }
 
 void btrfs_delete(struct btrfs * btrfs) {
+    btrfs_chunk_list_delete(btrfs->chunk_list);
     free(btrfs);
 }
 

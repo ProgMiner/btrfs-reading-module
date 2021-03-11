@@ -8,8 +8,8 @@ CFLAGS = -std=gnu11 -pedantic-errors -Wall -Werror $(FUSE_CFLAGS) -g -O0 # -O2
 LFLAGS = $(FUSE_LFLAGS)
 
 BUILDPATH = build
-SOURCES = btrfs.c btrfs_low.c
-HEADERS = include/btrfs.h btrfs.h btrfs_low.h types.h btrfs_consts.h \
+SOURCES = btrfs.c btrfs_low.c btrfs_chunk_list.c
+HEADERS = include/btrfs.h btrfs.h btrfs_low.h types.h btrfs_consts.h btrfs_chunk_list.h \
 		struct/btrfs_block_group_item.h struct/btrfs_chunk.h struct/btrfs_csum_item.h \
 		struct/btrfs_dev_extent.h struct/btrfs_dev_item.h struct/btrfs_dev_stats_item.h \
 		struct/btrfs_dev_replace_item.h struct/btrfs_balance_item.h struct/btrfs_dir_item.h \

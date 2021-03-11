@@ -15,7 +15,7 @@
 #define cpu_to_le8(v) (v)
 #define __le8 u8
 
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define cpu_to_le64(x) ((__force __le64)(u64)(bswap_64(x)))
 #define le64_to_cpu(x) ((__force u64)(__le64)(bswap_64(x)))
 #define cpu_to_le32(x) ((__force __le32)(u32)(bswap_32(x)))
