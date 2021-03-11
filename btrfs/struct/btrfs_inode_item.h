@@ -21,39 +21,39 @@
 
 struct btrfs_inode_item {
 
-	/* nfs style generation number */
-	__le64 generation;
+    /* nfs style generation number */
+    __le64 generation;
 
-	/* transid that last touched this inode */
-	__le64 transid;
+    /* transid that last touched this inode */
+    __le64 transid;
 
     /* stat.st_size; Size of the file in bytes */
-	__le64 size;
+    __le64 size;
 
     /* stat.st_blocks in byte units. Size allocated to this file, in bytes;
      * Sum of the offset fields of all EXTENT_DATA items for this inode. For directories: 0
      */
-	__le64 nbytes;
+    __le64 nbytes;
 
     /* unused for normal inodes
      * Contains byte offset of block group when used as a free space inode
      */
-	__le64 block_group;
+    __le64 block_group;
 
     /* stat.st_nlink; Count of INODE_REF entries for the inode. When used outside of a file tree, 1 */
-	__le32 nlink;
+    __le32 nlink;
 
     /* stat.st_uid */
-	__le32 uid;
+    __le32 uid;
 
     /* stat.st_gid */
-	__le32 gid;
+    __le32 gid;
 
     /* stat.st_mode */
-	__le32 mode;
+    __le32 mode;
 
     /* stat.st_rdev */
-	__le64 rdev;
+    __le64 rdev;
 
     /* inode flags
      *
@@ -93,31 +93,31 @@ struct btrfs_inode_item {
      *   - BTRFS_INODE_ROOT_ITEM_INIT [1 << 31]
      *     Flag to indicate that the flags and byte_limit flags have been properly initialized.
      */
-	__le64 flags;
+    __le64 flags;
 
-	/* sequence number used for NFS compatibility.
+    /* sequence number used for NFS compatibility.
      * Initialized to 0 and incremented each time mtime value is changed
      *
      * modification sequence number for NFS
      */
-	__le64 sequence;
+    __le64 sequence;
 
-	/* reserved for future use
+    /* reserved for future use
      *
-	 * a little future expansion, for more than this we can
-	 * just grow the inode item and version it
-	 */
-	__le64 reserved[4];
+     * a little future expansion, for more than this we can
+     * just grow the inode item and version it
+     */
+    __le64 reserved[4];
 
     /* stat.st_atime */
-	struct btrfs_timespec atime;
+    struct btrfs_timespec atime;
 
     /* stat.st_ctime */
-	struct btrfs_timespec ctime;
+    struct btrfs_timespec ctime;
 
     /* stat.st_mtime */
-	struct btrfs_timespec mtime;
+    struct btrfs_timespec mtime;
 
     /* timestamp of inode creation */
-	struct btrfs_timespec otime;
+    struct btrfs_timespec otime;
 } __attribute__ ((__packed__));

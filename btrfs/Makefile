@@ -22,7 +22,7 @@ HEADERS = include/btrfs.h btrfs.h btrfs_low.h types.h btrfs_consts.h btrfs_chunk
 		struct/btrfs_root_backup.h struct/btrfs_shared_data_ref.h struct/btrfs_stripe.h \
 		struct/btrfs_super_block.h struct/btrfs_timespec.h struct/btrfs_tree_block_info.h \
 		struct/btrfs_qgroup_status_item.h struct/btrfs_qgroup_info_item.h \
-		struct/btrfs_qgroup_limit_item.h
+		struct/btrfs_qgroup_limit_item.h struct/btrfs_key_pointer.h struct/btrfs_item.h
 TARGET = btrfs.a
 
 TEST_SOURCES = test/test.c

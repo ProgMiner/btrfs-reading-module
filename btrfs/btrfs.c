@@ -5,6 +5,7 @@
 #include <errno.h>
 
 #include "btrfs_low.h"
+#include "struct/btrfs_header.h"
 
 
 struct btrfs * btrfs_openfs(void * data) {
@@ -23,6 +24,7 @@ struct btrfs * btrfs_openfs(void * data) {
     }
 
     btrfs->chunk_list = btrfs_read_sys_array(btrfs->sb);
+    btrfs->chunk_list = btrfs_read_chunk_tree(btrfs->chunk_list, data, btrfs->sb->chunk_root);
 
     return btrfs;
 }

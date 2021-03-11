@@ -16,10 +16,10 @@
 struct btrfs_qgroup_status_item {
 
     /* quota version. Currently always set to 1 (BTRFS_QGROUP_STATUS_VERSION) */
-	__le64 version;
+    __le64 version;
 
     /* number updated during every commit. Used to check for inconsistencies */
-	__le64 generation;
+    __le64 generation;
 
     /* flags
      *
@@ -34,11 +34,11 @@ struct btrfs_qgroup_status_item {
      *     or because the fs has been mounted with a non-qgroup-aware version.
      *     Turning qouta off and on again makes it inconsistent, too.
      */
-	__le64 flags;
+    __le64 flags;
 
     /* used during rescan to record the progress. It contains a logical address
      *
      * progress during scanning
      */
-	__le64 rescan;
+    __le64 rescan;
 } __attribute__ ((__packed__));

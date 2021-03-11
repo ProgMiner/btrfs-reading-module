@@ -20,16 +20,16 @@ struct btrfs_dir_item {
     /* key for the INODE_ITEM or ROOT_ITEM associated with this entry.
      * Unused and zeroed out when the entry describes an extended attribute
      */
-	struct btrfs_disk_key location;
+    struct btrfs_disk_key location;
 
     /* transid of the transaction that created this entry */
-	__le64 transid;
+    __le64 transid;
 
     /* length of the extended attrivute associated with this entry. 0 for standard directories */
-	__le16 data_len;
+    __le16 data_len;
 
     /* length of directory entry name */
-	__le16 name_len;
+    __le16 name_len;
 
     /* type
      *
@@ -59,5 +59,5 @@ struct btrfs_dir_item {
      *   - BTRFS_FT_XATTR = 8
      *     The entry is an XATTR_ITEM.
      */
-	u8 type;
+    u8 type;
 } __attribute__ ((__packed__));

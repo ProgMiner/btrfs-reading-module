@@ -21,14 +21,14 @@ struct btrfs_key {
      * For example, in the EXTENT_TREE, the objectid contains the starting byte offset
      * of the extent it describes.
      */
-	u64 objectid;
+    u64 objectid;
 
     /* the type of the item this key describes
      *
      * The type field is universal. It always contains the type of the item identified by the key.
      * There are no changes in usage or context that depend on the tree using the key.
      */
-	u8 type;
+    u8 type;
 
     /* more accurately described as "third component."
      * It is literally an offset only in some contexts
@@ -38,5 +38,5 @@ struct btrfs_key {
      * Keys of type = METADATA_ITEM use the offset to store the level
      * of the tree where the tree block is located.
      */
-	u64 offset;
+    u64 offset;
 } __attribute__ ((__packed__));

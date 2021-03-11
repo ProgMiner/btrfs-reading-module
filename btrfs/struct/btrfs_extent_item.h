@@ -12,10 +12,10 @@
 struct btrfs_extent_item {
 
     /* the number of explicit references to this extent */
-	__le64 refs;
+    __le64 refs;
 
     /* transid of transaction that allocated this extent */
-	__le64 generation;
+    __le64 generation;
 
     /* flags
      *
@@ -27,5 +27,5 @@ struct btrfs_extent_item {
      *     - BTRFS_BLOCK_FLAG_FULL_BACKREF [0x80]
      *       Tree block back reference contains a full back reference.
      */
-	__le64 flags;
+    __le64 flags;
 } __attribute__ ((__packed__));

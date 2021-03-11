@@ -31,8 +31,8 @@ struct btrfs_extent_inline_ref {
      *     that describes this extent. Immediately following is a btrfs_shared_data_ref structure
      *     containing the reference count.
      */
-	u8 type;
+    u8 type;
 
     /* contents depend on type of reference */
-	__le64 offset;
+    __le64 offset;
 } __attribute__ ((__packed__));
