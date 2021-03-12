@@ -52,7 +52,7 @@ int main(int argc, const char ** argv) {
         goto free_btrfs;
     }
 
-    // TODO
+    /* TODO */
 
 free_btrfs:
     btrfs_delete(btrfs);
