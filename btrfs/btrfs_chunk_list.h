@@ -17,4 +17,8 @@ void btrfs_chunk_list_delete(struct btrfs_chunk_list * list);
 /* TODO several devs */
 void * btrfs_chunk_list_resolve(struct btrfs_chunk_list * list, void * data, u64 logical);
 
+#ifdef BTRFS_DEBUG
 void btrfs_chunk_list_print(struct btrfs_chunk_list * list);
+#else
+static inline void btrfs_chunk_list_print(struct btrfs_chunk_list * list) {}
+#endif

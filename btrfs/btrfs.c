@@ -6,6 +6,7 @@
 
 #include "btrfs_low.h"
 #include "struct/btrfs_header.h"
+#include "debug.h"
 
 
 struct btrfs * btrfs_openfs(void * data) {
@@ -19,14 +20,31 @@ struct btrfs * btrfs_openfs(void * data) {
     btrfs->sb = btrfs_low_find_superblock(data);
 
     if (!btrfs->sb) {
-        free(btrfs);
-        return NULL;
+        goto error;
     }
 
+    btrfs_debug_printf("Before reading sys array:\n");
+    btrfs_chunk_list_print(btrfs->chunk_list);
+
     btrfs->chunk_list = btrfs_read_sys_array(btrfs->sb);
+
+    btrfs_debug_printf("After reading sys array:\n");
+    btrfs_chunk_list_print(btrfs->chunk_list);
+
+    if (!btrfs->chunk_list) {
+        goto error;
+    }
+
     btrfs->chunk_list = btrfs_read_chunk_tree(btrfs->chunk_list, data, btrfs->sb->chunk_root);
 
+    btrfs_debug_printf("After reading chunk tree:\n");
+    btrfs_chunk_list_print(btrfs->chunk_list);
+
     return btrfs;
+
+error:
+    free(btrfs);
+    return NULL;
 }
 
 void btrfs_delete(struct btrfs * btrfs) {

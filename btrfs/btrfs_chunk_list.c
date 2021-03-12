@@ -1,7 +1,8 @@
 #include "btrfs_chunk_list.h"
 
 #include <stdlib.h>
-#include <stdio.h>
+
+#include "debug.h"
 
 
 struct btrfs_chunk_list {
@@ -107,8 +108,9 @@ void * btrfs_chunk_list_resolve(struct btrfs_chunk_list * list, void * data, u64
     return btrfs_chunk_list_resolve_stripe(list, data, logical_chunk_offset);
 }
 
+#ifdef BTRFS_DEBUG
 static inline void btrfs_chunk_list_print_stripe(struct btrfs_stripe * stripe) {
-    printf("    - %llu:%llu\n", btrfs_stripe_devid(stripe), btrfs_stripe_offset(stripe));
+    btrfs_debug_printf("    - %llu:%llu\n", btrfs_stripe_devid(stripe), btrfs_stripe_offset(stripe));
 }
 
 void btrfs_chunk_list_print(struct btrfs_chunk_list * list) {
@@ -116,14 +118,14 @@ void btrfs_chunk_list_print(struct btrfs_chunk_list * list) {
     u64 logical, length;
     u32 i;
 
-    printf("---- btrfs_chunk_list ----\n");
+    btrfs_debug_printf("---- btrfs_chunk_list ----\n");
 
     for (; list; list = list->next) {
         logical = list->key.offset;
         length = btrfs_chunk_length(&list->chunk);
         num_additional_stripes = btrfs_chunk_num_stripes(&list->chunk) - 1;
 
-        printf("  - %llu -> %llu (%llu)\n", logical, logical + length, length);
+        btrfs_debug_printf("  - %llu -> %llu (%llu)\n", logical, logical + length, length);
         btrfs_chunk_list_print_stripe(&list->chunk.stripe);
 
         for (i = 0; i < num_additional_stripes; ++i) {
@@ -131,5 +133,6 @@ void btrfs_chunk_list_print(struct btrfs_chunk_list * list) {
         }
     }
 
-    printf("---- btrfs_chunk_list ----\n");
+    btrfs_debug_printf("---- btrfs_chunk_list ----\n");
 }
+#endif
