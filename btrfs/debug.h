@@ -4,7 +4,7 @@
 #ifdef BTRFS_DEBUG
 #include <stdio.h>
 
-#define btrfs_debug_printf(__format, ...) printf(__format, ##__VA_ARGS__)
+#define btrfs_debug_printf(...) printf(__VA_ARGS__)
 #else
-#define btrfs_debug_printf(__format, ...)
+#define btrfs_debug_printf(...)
 #endif

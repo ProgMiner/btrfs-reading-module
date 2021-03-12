@@ -4,8 +4,13 @@
 #include <byteswap.h>
 
 
+#ifndef __force
 #define __force
+#endif
+
+#ifndef __bitwise
 #define __bitwise
+#endif
 
 /* Macros to generate set/get funcs for the struct fields
  * assume there is a lefoo_to_cpu for every type, so lets make a simple

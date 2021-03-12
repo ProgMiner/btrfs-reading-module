@@ -1,11 +1,7 @@
-
-FUSE_CFLAGS = `pkg-config fuse --cflags`
-FUSE_LFLAGS = `pkg-config fuse --libs`
-
 CC = gcc
 LD = gcc
-CFLAGS = -std=gnu11 -pedantic-errors -Wall -Werror $(FUSE_CFLAGS) -DBTRFS_DEBUG -g -O0 # -O2
-LFLAGS = $(FUSE_LFLAGS)
+CFLAGS = -std=gnu11 -pedantic-errors -Wall -Werror -DBTRFS_DEBUG -g -O0 # -O2
+LFLAGS =
 
 BUILDPATH = build
 SOURCES = btrfs.c btrfs_low.c btrfs_chunk_list.c
