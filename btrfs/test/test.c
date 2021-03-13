@@ -49,12 +49,11 @@ int main(int argc, const char ** argv) {
     if (!btrfs) {
         fprintf(stderr, "Couldn't init btrfs struct\n");
         ret = -1;
-        goto free_btrfs;
+        goto close;
     }
 
     /* TODO */
 
-free_btrfs:
     btrfs_delete(btrfs);
 
 close:

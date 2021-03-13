@@ -6,7 +6,7 @@
 
 #include "btrfs_low.h"
 #include "struct/btrfs_header.h"
-#include "debug.h"
+#include "btrfs_debug.h"
 
 
 struct btrfs * btrfs_openfs(void * data) {
@@ -39,6 +39,9 @@ struct btrfs * btrfs_openfs(void * data) {
 
     btrfs_debug_printf("After reading chunk tree:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
+
+    btrfs_debug_printf("Root tree:\n");
+    btrfs_traverse_btree_print(btrfs->chunk_list, data, btrfs->sb->root);
 
     return btrfs;
 

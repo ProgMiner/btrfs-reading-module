@@ -13,3 +13,13 @@ struct btrfs_item {
 static inline u32 btrfs_item_offset(struct btrfs_item * item) {
     return le32_to_cpu(item->offset);
 }
+
+static inline u32 btrfs_item_size(struct btrfs_item * item) {
+    return le32_to_cpu(item->size);
+}
+
+#ifdef BTRFS_DEBUG
+void btrfs_item_print(struct btrfs_item * item);
+#else
+#define btrfs_item_print(__item)
+#endif
