@@ -68,19 +68,23 @@ static void * btrfs_chunk_list_resolve_stripe(
         u64 offset
 ) {
     u64 stripe_len = btrfs_chunk_stripe_len(&list->chunk);
+    u64 num_stripes = btrfs_chunk_num_stripes(&list->chunk);
 
     u64 stripe_number = offset / stripe_len;
     u64 logical_offset = offset - (stripe_number * stripe_len);
 
     struct btrfs_stripe * stripe;
 
-    if (stripe_number == 0) {
+    u64 stripe_index = stripe_number % num_stripes;
+    stripe_number = stripe_number / num_stripes;
+
+    if (stripe_index == 0) {
         stripe = &list->chunk.stripe;
     } else {
-        stripe = list->more_stripes + (stripe_number - 1);
+        stripe = list->more_stripes + (stripe_index - 1);
     }
 
-    return (u8 *) data + btrfs_stripe_offset(stripe) + logical_offset;
+    return (u8 *) data + btrfs_stripe_offset(stripe) + logical_offset + stripe_number * stripe_len;
 }
 
 void * btrfs_chunk_list_resolve(struct btrfs_chunk_list * list, void * data, u64 logical) {
