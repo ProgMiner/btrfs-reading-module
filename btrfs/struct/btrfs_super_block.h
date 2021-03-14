@@ -100,3 +100,15 @@ struct btrfs_super_block {
 
     struct btrfs_root_backup super_roots[BTRFS_NUM_BACKUP_ROOTS];
 } __attribute__ ((__packed__));
+
+static inline u32 btrfs_super_block_sys_chunk_array_size(struct btrfs_super_block * super_block) {
+    return le32_to_cpu(super_block->sys_chunk_array_size);
+}
+
+static inline u64 btrfs_super_block_chunk_root(struct btrfs_super_block * super_block) {
+    return le64_to_cpu(super_block->chunk_root);
+}
+
+static inline u64 btrfs_super_block_root(struct btrfs_super_block * super_block) {
+    return le64_to_cpu(super_block->root);
+}

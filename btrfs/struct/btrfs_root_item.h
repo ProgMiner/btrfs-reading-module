@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../types.h"
+#include "btrfs_inode_item.h"
+#include "btrfs_disk_key.h"
+#include "btrfs_timespec.h"
 
 
 #define BTRFS_ROOT_SUBVOL_RDONLY 0x1

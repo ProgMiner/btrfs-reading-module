@@ -26,7 +26,7 @@ struct btrfs * btrfs_openfs(void * data) {
     btrfs_debug_printf("Before reading sys array:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
 
-    btrfs->chunk_list = btrfs_read_sys_array(btrfs->sb);
+    btrfs->chunk_list = btrfs_low_read_sys_array(btrfs->sb);
 
     btrfs_debug_printf("After reading sys array:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
@@ -35,13 +35,22 @@ struct btrfs * btrfs_openfs(void * data) {
         goto error;
     }
 
-    btrfs->chunk_list = btrfs_read_chunk_tree(btrfs->chunk_list, data, btrfs->sb->chunk_root);
+    btrfs->chunk_list = btrfs_low_read_chunk_tree(
+            btrfs->chunk_list,
+            data,
+            btrfs_super_block_chunk_root(btrfs->sb)
+    );
 
     btrfs_debug_printf("After reading chunk tree:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
 
-    btrfs_debug_printf("Root tree:\n");
-    btrfs_traverse_btree_print(btrfs->chunk_list, data, btrfs->sb->root);
+    btrfs->root_fs_tree_root = btrfs_low_find_root_fs_tree_root(
+            btrfs->chunk_list,
+            data,
+            btrfs_super_block_root(btrfs->sb)
+    );
+
+    btrfs_debug_printf("%llu", btrfs->root_fs_tree_root);
 
     return btrfs;
 

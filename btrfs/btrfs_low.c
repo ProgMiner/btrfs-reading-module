@@ -3,7 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "btrfs_traverse_btree.h"
 #include "struct/btrfs_key_pointer.h"
+#include "struct/btrfs_root_item.h"
 #include "struct/btrfs_disk_key.h"
 #include "struct/btrfs_header.h"
 #include "struct/btrfs_chunk.h"
@@ -17,8 +19,8 @@ struct btrfs_super_block * btrfs_low_find_superblock(void * data) {
     return (void *) (((uint8_t *) data) + BTRFS_SUPER_INFO_OFFSET);
 }
 
-struct btrfs_chunk_list * btrfs_read_sys_array(struct btrfs_super_block * sb) {
-    u32 length = le32_to_cpu(sb->sys_chunk_array_size);
+struct btrfs_chunk_list * btrfs_low_read_sys_array(struct btrfs_super_block * sb) {
+    u32 length = btrfs_super_block_sys_chunk_array_size(sb);
     u8 * position = sb->sys_chunk_array;
     struct btrfs_key key;
 
@@ -41,7 +43,7 @@ struct btrfs_chunk_list * btrfs_read_sys_array(struct btrfs_super_block * sb) {
     return result;
 }
 
-static enum btrfs_traverse_btree_handler_result __btrfs_read_chunk_tree_handler(
+static enum btrfs_traverse_btree_handler_result __btrfs_low_read_chunk_tree_handler(
         struct btrfs_chunk_list ** result,
         struct btrfs_key item_key,
         void * item_data
@@ -60,7 +62,7 @@ static enum btrfs_traverse_btree_handler_result __btrfs_read_chunk_tree_handler(
     btrfs_traverse_btree_continue;
 }
 
-struct btrfs_chunk_list * btrfs_read_chunk_tree(
+struct btrfs_chunk_list * btrfs_low_read_chunk_tree(
         struct btrfs_chunk_list * chunk_list,
         void * data,
         u64 chunk_root
@@ -68,7 +70,35 @@ struct btrfs_chunk_list * btrfs_read_chunk_tree(
     struct btrfs_chunk_list * result = chunk_list;
 
     btrfs_debug_printf("Reading chunk tree:\n");
-    btrfs_traverse_btree(chunk_list, data, chunk_root, &result, __btrfs_read_chunk_tree_handler);
+    btrfs_traverse_btree(chunk_list, data, chunk_root, &result, __btrfs_low_read_chunk_tree_handler);
+
+    return result;
+}
+
+static enum btrfs_traverse_btree_handler_result __btrfs_low_find_root_fs_tree_root_handler(
+        u64 * result,
+        struct btrfs_key item_key,
+        void * item_data
+) {
+    if (item_key.objectid == BTRFS_FS_TREE_OBJECTID
+        && item_key.type == BTRFS_ROOT_ITEM_KEY
+        && item_key.offset == 0) {
+        *result = ((struct btrfs_root_item *) item_data)->bytenr;
+        btrfs_traverse_btree_break;
+    }
+
+    btrfs_traverse_btree_continue;
+}
+
+u64 btrfs_low_find_root_fs_tree_root(
+        struct btrfs_chunk_list * chunk_list,
+        void * data,
+        u64 root
+) {
+    u64 result = 0;
+
+    btrfs_debug_printf("Find root FS_TREE root:\n");
+    btrfs_traverse_btree(chunk_list, data, root, &result, __btrfs_low_find_root_fs_tree_root_handler);
 
     return result;
 }
