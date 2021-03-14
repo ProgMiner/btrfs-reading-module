@@ -1,8 +1,10 @@
 #include "btrfs_traverse_btree.h"
 
 #include "struct/btrfs_key_pointer.h"
+#include "struct/btrfs_disk_key.h"
 #include "struct/btrfs_header.h"
 #include "struct/btrfs_item.h"
+#include "struct/btrfs_key.h"
 #include "btrfs_debug.h"
 
 

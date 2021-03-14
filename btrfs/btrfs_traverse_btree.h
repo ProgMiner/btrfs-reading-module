@@ -1,3 +1,5 @@
+#pragma once
+
 #include "btrfs_chunk_list.h"
 #include "struct/btrfs_key.h"
 #include "types.h"

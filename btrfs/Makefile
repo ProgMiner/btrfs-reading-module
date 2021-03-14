@@ -5,9 +5,10 @@ LFLAGS =
 
 BUILDPATH = build
 SOURCES = btrfs.c btrfs_low.c btrfs_chunk_list.c btrfs_traverse_btree.c btrfs_debug.c \
+		btrfs_find_in_btree.c \
 		struct/btrfs_disk_key.c struct/btrfs_key.c struct/btrfs_key_pointer.c struct/btrfs_item.c
 HEADERS = include/btrfs.h btrfs.h btrfs_low.h types.h btrfs_consts.h btrfs_chunk_list.h \
-		btrfs_debug.h btrfs_traverse_btree.h \
+		btrfs_debug.h btrfs_traverse_btree.h btrfs_find_in_btree.h \
 		struct/btrfs_block_group_item.h struct/btrfs_chunk.h struct/btrfs_csum_item.h \
 		struct/btrfs_dev_extent.h struct/btrfs_dev_item.h struct/btrfs_dev_stats_item.h \
 		struct/btrfs_dev_replace_item.h struct/btrfs_balance_item.h struct/btrfs_dir_item.h \
