@@ -5,10 +5,10 @@ LFLAGS =
 
 BUILDPATH = build
 SOURCES = btrfs.c btrfs_low.c btrfs_chunk_list.c btrfs_traverse_btree.c btrfs_debug.c \
-		btrfs_find_in_btree.c \
+		btrfs_find_in_btree.c lib/crc32c.c \
 		struct/btrfs_disk_key.c struct/btrfs_key.c struct/btrfs_key_pointer.c struct/btrfs_item.c
 HEADERS = include/btrfs.h btrfs.h btrfs_low.h types.h btrfs_consts.h btrfs_chunk_list.h \
-		btrfs_debug.h btrfs_traverse_btree.h btrfs_find_in_btree.h \
+		btrfs_debug.h btrfs_traverse_btree.h btrfs_find_in_btree.h lib/crc32c.h \
 		struct/btrfs_block_group_item.h struct/btrfs_chunk.h struct/btrfs_csum_item.h \
 		struct/btrfs_dev_extent.h struct/btrfs_dev_item.h struct/btrfs_dev_stats_item.h \
 		struct/btrfs_dev_replace_item.h struct/btrfs_balance_item.h struct/btrfs_dir_item.h \
@@ -22,7 +22,7 @@ HEADERS = include/btrfs.h btrfs.h btrfs_low.h types.h btrfs_consts.h btrfs_chunk
 		struct/btrfs_super_block.h struct/btrfs_timespec.h struct/btrfs_tree_block_info.h \
 		struct/btrfs_qgroup_status_item.h struct/btrfs_qgroup_info_item.h \
 		struct/btrfs_qgroup_limit_item.h struct/btrfs_key_pointer.h struct/btrfs_item.h
-TARGET = btrfs.a
+TARGET = libbtrfs.a
 
 TEST_SOURCES = test/test.c
 TEST_TARGET = test/test

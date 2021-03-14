@@ -35,5 +35,5 @@ $(OBJECTS): $(BUILDPATH)/%.o : %.c $(HEADERS)
 	@mkdir -p $(@D)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(TARGET): $(OBJECTS) btrfs/btrfs.a
+$(TARGET): $(OBJECTS) btrfs/libbtrfs.a
 	$(LD) -o $@ $^ $(LFLAGS)

@@ -11,6 +11,7 @@
 #include "struct/btrfs_header.h"
 #include "struct/btrfs_chunk.h"
 #include "struct/btrfs_item.h"
+#include "lib/crc32c.h"
 
 
 struct btrfs_super_block * btrfs_low_find_superblock(void * data) {
@@ -92,4 +93,23 @@ u64 btrfs_low_find_root_fs_tree_root(
     root_item = btrfs_find_in_btree(chunk_list, data, root, key, NULL);
 
     return root_item ? root_item->bytenr : 0;
+}
+
+static inline u64 btrfs_name_hash(const char * name, int len) {
+    return crc32c((u32) ~1, name, len);
+}
+
+int btrfs_low_locate_file(
+        struct btrfs_chunk_list * chunk_list,
+        void * data,
+        u64 fs_tree,
+        const char * path,
+        struct btrfs_low_file_id * result
+) {
+    size_t length = strlen(path);
+    u64 hash = btrfs_name_hash(path, length);
+
+    btrfs_debug_printf("hash of %s is %llu\n", path, hash);
+
+    return -1;
 }

@@ -57,16 +57,13 @@ struct btrfs * btrfs_openfs(void * data) {
 
     btrfs_debug_printf("Found root FS_TREE root bytenr: %llu\n", btrfs->root_fs_tree_root);
 
-    (void) file_id;
-    /*
-    if (btrfs_low_locate_file(btrfs->chunk_list, data, "/f1", &file_id)) {
+    if (btrfs_low_locate_file(btrfs->chunk_list, data, btrfs->root_fs_tree_root, "f1", &file_id)) {
         btrfs_debug_printf("Couldn't find file /f1\n");
         goto error;
     }
 
     btrfs_debug_printf("Found file /f1 at: FS_TREE %llu, OBJECTID %llu\n",
-            file_id.fs_tree_root, file_id.dir_item_objectid);
-    */
+            file_id.fs_tree, file_id.dir_item);
 
     return btrfs;
 
