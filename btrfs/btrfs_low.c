@@ -91,5 +91,5 @@ u64 btrfs_low_find_root_fs_tree_root(
     btrfs_debug_printf("Find root FS_TREE root:\n");
     root_item = btrfs_find_in_btree(chunk_list, data, root, key, NULL);
 
-    return root_item->bytenr;
+    return root_item ? root_item->bytenr : 0;
 }

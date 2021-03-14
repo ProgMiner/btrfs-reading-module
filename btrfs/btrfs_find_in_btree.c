@@ -136,6 +136,7 @@ void * btrfs_find_in_btree(
     struct btrfs_header * header = btrfs_chunk_list_resolve(chunk_list, data, btree_root);
     struct btrfs_key_pointer * key_ptr;
     struct btrfs_item * item;
+    int ret;
 
     if (!header) {
         return NULL;
@@ -144,11 +145,15 @@ void * btrfs_find_in_btree(
     btrfs_debug_indent();
     btrfs_debug_printf("----  btrfs_find_in_btree ----\n");
 
+    btrfs_debug_indent();
+    btrfs_debug_printf("Searching key:\n");
+    btrfs_key_print(&key);
+
     while (btrfs_header_level(header) > 0) {
         btrfs_binary_search(header, key, (void **) &key_ptr);
 
         btrfs_debug_indent();
-        btrfs_debug_printf("  - key_pointer:\n");
+        btrfs_debug_printf("  - level %u key_pointer:\n", btrfs_header_level(header));
 
         btrfs_debug_increase_indent(4);
         btrfs_key_pointer_print(key_ptr);
@@ -157,16 +162,25 @@ void * btrfs_find_in_btree(
         header = btrfs_chunk_list_resolve(chunk_list, data, btrfs_key_pointer_blocknr(key_ptr));
     }
 
-    btrfs_binary_search(header, key, (void **) &item);
+    ret = btrfs_binary_search(header, key, (void **) &item);
 
-    btrfs_debug_indent();
-    btrfs_debug_printf("  - item:\n");
+    if (!ret) {
+        btrfs_debug_indent();
+        btrfs_debug_printf("  - item:\n");
 
-    btrfs_debug_increase_indent(4);
-    btrfs_item_print(item);
-    btrfs_debug_decrease_indent(4);
+        btrfs_debug_increase_indent(4);
+        btrfs_item_print(item);
+        btrfs_debug_decrease_indent(4);
+    } else {
+        btrfs_debug_indent();
+        btrfs_debug_printf("item not found\n");
+    }
 
     btrfs_debug_printf("---- /btrfs_find_in_btree ----\n");
+
+    if (ret) {
+        return 0;
+    }
 
     if (result) {
         btrfs_disk_key_to_cpu(result, &item->key);
