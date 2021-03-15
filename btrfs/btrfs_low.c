@@ -2,12 +2,14 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "btrfs_find_in_btree.h"
 #include "btrfs_traverse_btree.h"
 #include "struct/btrfs_key_pointer.h"
 #include "struct/btrfs_root_item.h"
 #include "struct/btrfs_disk_key.h"
+#include "struct/btrfs_dir_item.h"
 #include "struct/btrfs_header.h"
 #include "struct/btrfs_chunk.h"
 #include "struct/btrfs_item.h"
@@ -99,6 +101,12 @@ static inline u64 btrfs_name_hash(const char * name, int len) {
     return crc32c((u32) ~1, name, len);
 }
 
+static inline const char * find_filename_end(const char * path) {
+    const char * end = strchr(path, '/');
+
+    return end ? end : path + strlen(path);
+}
+
 int btrfs_low_locate_file(
         struct btrfs_chunk_list * chunk_list,
         void * data,
@@ -106,10 +114,35 @@ int btrfs_low_locate_file(
         const char * path,
         struct btrfs_low_file_id * result
 ) {
-    size_t length = strlen(path);
-    u64 hash = btrfs_name_hash(path, length);
+    struct btrfs_dir_item * dir_item;
+    struct btrfs_key key, key_buf;
+    const char * end;
 
-    btrfs_debug_printf("hash of %s is %llu\n", path, hash);
+    key.objectid = BTRFS_FIRST_FREE_OBJECTID;
+    key.type = BTRFS_DIR_ITEM_KEY;
 
-    return -1;
+    do {
+        end = find_filename_end(path);
+        key.offset = btrfs_name_hash(path, end - path);
+
+        dir_item = btrfs_find_in_btree(chunk_list, data, fs_tree, key, NULL);
+        if (!dir_item) {
+            return -ENOENT;
+        }
+
+        btrfs_disk_key_to_cpu(&key_buf, &dir_item->location);
+        key.objectid = key_buf.objectid;
+
+        if (key_buf.type != BTRFS_INODE_ITEM_KEY) {
+            /* TODO handle */
+            exit(111);
+        }
+
+        path = end + 1;
+    } while (*end);
+
+    result->fs_tree = fs_tree;
+    result->dir_item = key.objectid;
+
+    return 0;
 }

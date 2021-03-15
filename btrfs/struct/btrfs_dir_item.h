@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../types.h"
+#include "btrfs_disk_key.h"
 
 
 #define BTRFS_FT_UNKNOWN  0
