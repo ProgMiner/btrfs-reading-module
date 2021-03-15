@@ -6,7 +6,7 @@
 
 struct btrfs {
     void * data;
-    struct btrfs_super_block * sb;
     struct btrfs_chunk_list * chunk_list;
-    u64 root_fs_tree_root;
+    u64 root_tree;
+    u64 root_fs_tree;
 };

@@ -12,22 +12,23 @@
 struct btrfs * btrfs_openfs(void * data) {
     struct btrfs * btrfs = malloc(sizeof(btrfs));
     struct btrfs_low_file_id file_id;
+    struct btrfs_super_block * sb;
 
     if (!btrfs) {
         return NULL;
     }
 
     btrfs->data = data;
-    btrfs->sb = btrfs_low_find_superblock(data);
+    sb = btrfs_low_find_superblock(data);
 
-    if (!btrfs->sb) {
+    if (!sb) {
         goto error;
     }
 
     btrfs_debug_printf("Before reading sys array:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
 
-    btrfs->chunk_list = btrfs_low_read_sys_array(btrfs->sb);
+    btrfs->chunk_list = btrfs_low_read_sys_array(sb);
 
     btrfs_debug_printf("After reading sys array:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
@@ -39,25 +40,26 @@ struct btrfs * btrfs_openfs(void * data) {
     btrfs->chunk_list = btrfs_low_read_chunk_tree(
             btrfs->chunk_list,
             data,
-            btrfs_super_block_chunk_root(btrfs->sb)
+            btrfs_super_block_chunk_root(sb)
     );
 
     btrfs_debug_printf("After reading chunk tree:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
 
-    btrfs->root_fs_tree_root = btrfs_low_find_root_fs_tree_root(
+    btrfs->root_tree = btrfs_super_block_root(sb);
+    btrfs->root_fs_tree = btrfs_low_find_root_fs_tree_root(
             btrfs->chunk_list,
             data,
-            btrfs_super_block_root(btrfs->sb)
+            btrfs->root_tree
     );
 
-    if (!btrfs->root_fs_tree_root) {
+    if (!btrfs->root_fs_tree) {
         goto error;
     }
 
-    btrfs_debug_printf("Found root FS_TREE root bytenr: %llu\n", btrfs->root_fs_tree_root);
+    btrfs_debug_printf("Found root FS_TREE root bytenr: %llu\n", btrfs->root_fs_tree);
 
-    if (btrfs_low_locate_file(btrfs->chunk_list, data, btrfs_super_block_root(btrfs->sb), btrfs->root_fs_tree_root, "ext2_saved", &file_id)) {
+    if (btrfs_low_locate_file(btrfs->chunk_list, data, btrfs->root_tree, btrfs->root_fs_tree, "ext2_saved", &file_id)) {
         btrfs_debug_printf("Couldn't find file\n");
         goto error;
     }
