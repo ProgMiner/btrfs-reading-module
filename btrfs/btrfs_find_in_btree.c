@@ -1,6 +1,7 @@
 #include "btrfs_find_in_btree.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "struct/btrfs_key_pointer.h"
 #include "struct/btrfs_disk_key.h"
@@ -44,7 +45,8 @@ static int btrfs_comp_keys(
 /* binary search
  *
  * if found returns 0 and result is item with specified key
- * otherwise returns 1 and result is maximal item that key lower than query key
+ * otherwise returns 1 and result is item with maximal key that lower than query key
+ * if that item is not present, returns -1 and result is not defined
  */
 static int __btrfs_binary_search(
         void * start,
@@ -56,6 +58,7 @@ static int __btrfs_binary_search(
 ) {
     size_t left = 0, right = count, middle;
     struct btrfs_key middle_key;
+    u8 * middle_item;
     int rel;
 
     btrfs_debug_indent();
@@ -70,9 +73,9 @@ static int __btrfs_binary_search(
         btrfs_debug_printf("Current range: [%lu, %lu)\n", left, right);
 
         middle = left + (right - left) / 2;
-        *result = (u8 *) start + middle * item_size;
+        middle_item = (u8 *) start + middle * item_size;
 
-        btrfs_disk_key_to_cpu(&middle_key, (void *) (((u8 *) *result) + key_offset));
+        btrfs_disk_key_to_cpu(&middle_key, (void *) (middle_item + key_offset));
         rel = btrfs_comp_keys(middle_key, key);
 
         btrfs_debug_indent();
@@ -89,11 +92,15 @@ static int __btrfs_binary_search(
     }
 
     btrfs_debug_indent();
-    btrfs_debug_printf("----  btrfs_binary_search ----\n");
+    btrfs_debug_printf("---- /btrfs_binary_search ----\n");
 
     if (rel == 0) {
+        *result = (u8 *) start + middle * item_size;
         return 0;
+    } else if (left == 0) {
+        return -1;
     } else {
+        *result = (u8 *) start + (left - 1) * item_size;
         return 1;
     }
 }
@@ -126,6 +133,16 @@ static int btrfs_binary_search(
     }
 }
 
+/* b-tree search
+ *
+ * if item with specified key is present in tree, returns item and result is set to key,
+ * otherwise returns NULL and result is not defined
+ *
+ * if key.offset == -1ULL finds not exactly key but item with maximal key
+ * that obejectid and type is equals to query
+ *
+ * result can be NULL if you don't need to get key
+ */
 void * btrfs_find_in_btree(
         struct btrfs_chunk_list * chunk_list,
         void * data,
@@ -136,6 +153,7 @@ void * btrfs_find_in_btree(
     struct btrfs_header * header = btrfs_chunk_list_resolve(chunk_list, data, btree_root);
     struct btrfs_key_pointer * key_ptr;
     struct btrfs_item * item;
+    bool found;
     int ret;
 
     if (!header) {
@@ -163,8 +181,9 @@ void * btrfs_find_in_btree(
     }
 
     ret = btrfs_binary_search(header, key, (void **) &item);
+    found = ret == 0 || (ret > 0 && key.offset == -1ULL);
 
-    if (!ret) {
+    if (found) {
         btrfs_debug_indent();
         btrfs_debug_printf("  - item:\n");
 
@@ -178,7 +197,7 @@ void * btrfs_find_in_btree(
 
     btrfs_debug_printf("---- /btrfs_find_in_btree ----\n");
 
-    if (ret) {
+    if (!found) {
         return 0;
     }
 

@@ -16,11 +16,6 @@
 #include "lib/crc32c.h"
 
 
-struct __btrfs_low_find_tree_root_acc {
-    u64 objectid;
-    u64 result;
-};
-
 struct __btrfs_low_locate_file_acc {
     u64 objectid;
     u64 hash;
@@ -92,35 +87,23 @@ struct btrfs_chunk_list * btrfs_low_read_chunk_tree(
     return result;
 }
 
-static enum btrfs_traverse_btree_handler_result __btrfs_low_find_tree_root_handler(
-        struct __btrfs_low_find_tree_root_acc * acc,
-        struct btrfs_key item_key,
-        void * item_data
-) {
-    if (item_key.type != BTRFS_ROOT_ITEM_KEY) {
-        btrfs_traverse_btree_continue;
-    }
-
-    if (item_key.objectid != acc->objectid) {
-        btrfs_traverse_btree_continue;
-    }
-
-    acc->result = btrfs_root_item_bytenr((struct btrfs_root_item *) item_data);
-    btrfs_traverse_btree_break;
-}
-
 static u64 btrfs_low_find_tree_root(
         struct btrfs_chunk_list * chunk_list,
         void * data,
         u64 root,
         u64 objectid
 ) {
-    struct __btrfs_low_find_tree_root_acc acc = { .objectid = objectid, .result = 0 };
+    struct btrfs_root_item * root_item;
+    struct btrfs_key key = {
+        .objectid = objectid,
+        .type = BTRFS_ROOT_ITEM_KEY,
+        .offset = -1ULL
+    };
 
     btrfs_debug_printf("Find tree #%llu root:\n", objectid);
-    btrfs_traverse_btree(chunk_list, data, root, &acc, __btrfs_low_find_tree_root_handler);
+    root_item = btrfs_find_in_btree(chunk_list, data, root, key, NULL);
 
-    return acc.result;
+    return root_item ? root_item->bytenr : 0;
 }
 
 u64 btrfs_low_find_root_fs_tree_root(
@@ -210,6 +193,7 @@ int btrfs_low_locate_file(
             fs_tree = btrfs_low_find_tree_root(chunk_list, data, root_tree, key.objectid);
             acc.objectid = BTRFS_FIRST_FREE_OBJECTID;
         } else {
+            /* there could not be anything else */
             return -EIO;
         }
 
