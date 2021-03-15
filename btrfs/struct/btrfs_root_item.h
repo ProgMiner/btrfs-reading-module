@@ -86,3 +86,7 @@ struct btrfs_root_item {
     /* for future */
     __le64 reserved[8];
 } __attribute__ ((__packed__));
+
+static inline u64 btrfs_root_item_bytenr(struct btrfs_root_item * root_item) {
+    return le64_to_cpu(root_item->bytenr);
+}

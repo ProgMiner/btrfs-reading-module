@@ -36,6 +36,7 @@ u64 btrfs_low_find_root_fs_tree_root(
 int btrfs_low_locate_file(
         struct btrfs_chunk_list * chunk_list,
         void * data,
+        u64 root_tree,
         u64 fs_tree,
         const char * path,
         struct btrfs_low_file_id * result
