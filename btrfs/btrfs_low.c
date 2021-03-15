@@ -21,6 +21,14 @@ struct __btrfs_low_find_tree_root_acc {
     u64 result;
 };
 
+struct __btrfs_low_locate_file_acc {
+    u64 objectid;
+    u64 hash;
+    const char * filename;
+    size_t filename_length;
+    struct btrfs_dir_item * result;
+};
+
 struct btrfs_super_block * btrfs_low_find_superblock(void * data) {
     /* TODO add checking for errors */
     /* TODO maybe add searching mirrors? */
@@ -84,7 +92,7 @@ struct btrfs_chunk_list * btrfs_low_read_chunk_tree(
     return result;
 }
 
-static enum btrfs_traverse_btree_handler_result __btrfs_low_find_tree_root(
+static enum btrfs_traverse_btree_handler_result __btrfs_low_find_tree_root_handler(
         struct __btrfs_low_find_tree_root_acc * acc,
         struct btrfs_key item_key,
         void * item_data
@@ -110,7 +118,7 @@ static u64 btrfs_low_find_tree_root(
     struct __btrfs_low_find_tree_root_acc acc = { .objectid = objectid, .result = 0 };
 
     btrfs_debug_printf("Find tree #%llu root:\n", objectid);
-    btrfs_traverse_btree(chunk_list, data, root, &acc, __btrfs_low_find_tree_root);
+    btrfs_traverse_btree(chunk_list, data, root, &acc, __btrfs_low_find_tree_root_handler);
 
     return acc.result;
 }
@@ -133,6 +141,38 @@ static inline const char * find_filename_end(const char * path) {
     return end ? end : path + strlen(path);
 }
 
+static enum btrfs_traverse_btree_handler_result __btrfs_low_locate_file_handler(
+        struct __btrfs_low_locate_file_acc * acc,
+        struct btrfs_key item_key,
+        void * item_data
+) {
+    struct btrfs_dir_item * dir_item;
+
+    if (item_key.type != BTRFS_DIR_ITEM_KEY) {
+        btrfs_traverse_btree_continue;
+    }
+
+    if (item_key.objectid != acc->objectid) {
+        btrfs_traverse_btree_continue;
+    }
+
+    if (item_key.offset != acc->hash) {
+        btrfs_traverse_btree_continue;
+    }
+
+    dir_item = item_data;
+    if (btrfs_dir_item_name_len(dir_item) != acc->filename_length) {
+        btrfs_traverse_btree_continue;
+    }
+
+    if (strncmp((const char *) (dir_item + 1), acc->filename, acc->filename_length) != 0) {
+        btrfs_traverse_btree_continue;
+    }
+
+    acc->result = dir_item;
+    btrfs_traverse_btree_break;
+}
+
 int btrfs_low_locate_file(
         struct btrfs_chunk_list * chunk_list,
         void * data,
@@ -141,29 +181,34 @@ int btrfs_low_locate_file(
         const char * path,
         struct btrfs_low_file_id * result
 ) {
-    struct btrfs_dir_item * dir_item;
-    struct btrfs_key key, key_buf;
+    struct __btrfs_low_locate_file_acc acc;
+    struct btrfs_key key;
     const char * end;
 
-    key.objectid = BTRFS_FIRST_FREE_OBJECTID;
-    key.type = BTRFS_DIR_ITEM_KEY;
+    acc.objectid = BTRFS_FIRST_FREE_OBJECTID;
+    if (!*path) {
+        goto end;
+    }
 
     do {
         end = find_filename_end(path);
-        key.offset = btrfs_name_hash(path, end - path);
+        acc.hash = btrfs_name_hash(path, end - path);
 
-        dir_item = btrfs_find_in_btree(chunk_list, data, fs_tree, key, NULL);
-        if (!dir_item) {
+        acc.filename = path;
+        acc.filename_length = end - path;
+        acc.result = NULL;
+
+        btrfs_traverse_btree(chunk_list, data, fs_tree, &acc, __btrfs_low_locate_file_handler);
+        if (!acc.result) {
             return -ENOENT;
         }
 
-        btrfs_disk_key_to_cpu(&key_buf, &dir_item->location);
-
-        if (key_buf.type == BTRFS_INODE_ITEM_KEY) {
-            key.objectid = key_buf.objectid;
-        } else if (key_buf.type == BTRFS_ROOT_ITEM_KEY) {
-            fs_tree = btrfs_low_find_tree_root(chunk_list, data, root_tree, key_buf.objectid);
-            key.objectid = BTRFS_FIRST_FREE_OBJECTID;
+        btrfs_disk_key_to_cpu(&key, &acc.result->location);
+        if (key.type == BTRFS_INODE_ITEM_KEY) {
+            acc.objectid = key.objectid;
+        } else if (key.type == BTRFS_ROOT_ITEM_KEY) {
+            fs_tree = btrfs_low_find_tree_root(chunk_list, data, root_tree, key.objectid);
+            acc.objectid = BTRFS_FIRST_FREE_OBJECTID;
         } else {
             return -EIO;
         }
@@ -171,7 +216,8 @@ int btrfs_low_locate_file(
         path = end + 1;
     } while (*end);
 
+end:
     result->fs_tree = fs_tree;
-    result->dir_item = key.objectid;
+    result->dir_item = acc.objectid;
     return 0;
 }

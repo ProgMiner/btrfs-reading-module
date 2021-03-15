@@ -62,3 +62,7 @@ struct btrfs_dir_item {
      */
     u8 type;
 } __attribute__ ((__packed__));
+
+static inline u16 btrfs_dir_item_name_len(struct btrfs_dir_item * dir_item) {
+    return le16_to_cpu(dir_item->name_len);
+}

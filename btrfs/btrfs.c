@@ -59,7 +59,7 @@ struct btrfs * btrfs_openfs(void * data) {
 
     btrfs_debug_printf("Found root FS_TREE root bytenr: %llu\n", btrfs->root_fs_tree);
 
-    if (btrfs_low_locate_file(btrfs->chunk_list, data, btrfs->root_tree, btrfs->root_fs_tree, "ext2_saved", &file_id)) {
+    if (btrfs_low_locate_file(btrfs->chunk_list, data, btrfs->root_tree, btrfs->root_fs_tree, "ext2_saved/image", &file_id)) {
         btrfs_debug_printf("Couldn't find file\n");
         goto error;
     }

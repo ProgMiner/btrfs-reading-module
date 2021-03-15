@@ -13,7 +13,7 @@ struct btrfs_low_file_id {
     /* bytenr of fs_tree root */
     u64 fs_tree;
 
-    /* objectid of dir_item */
+    /* objectid of inode_item */
     u64 dir_item;
 };
 
