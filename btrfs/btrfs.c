@@ -10,7 +10,7 @@
 
 
 struct btrfs * btrfs_openfs(void * data) {
-    struct btrfs * btrfs = malloc(sizeof(btrfs));
+    struct btrfs * btrfs = malloc(sizeof(struct btrfs));
     struct btrfs_low_file_id file_id;
     struct btrfs_super_block * sb;
 
@@ -22,7 +22,7 @@ struct btrfs * btrfs_openfs(void * data) {
     sb = btrfs_low_find_superblock(data);
 
     if (!sb) {
-        goto error;
+        goto free_btrfs;
     }
 
     btrfs_debug_printf("Before reading sys array:\n");
@@ -34,7 +34,7 @@ struct btrfs * btrfs_openfs(void * data) {
     btrfs_chunk_list_print(btrfs->chunk_list);
 
     if (!btrfs->chunk_list) {
-        goto error;
+        goto free_btrfs;
     }
 
     btrfs->chunk_list = btrfs_low_read_chunk_tree(
@@ -54,14 +54,14 @@ struct btrfs * btrfs_openfs(void * data) {
     );
 
     if (!btrfs->root_fs_tree) {
-        goto error;
+        goto free_chunks;
     }
 
     btrfs_debug_printf("Found root FS_TREE root bytenr: %llu\n", btrfs->root_fs_tree);
 
     if (btrfs_low_locate_file(btrfs->chunk_list, data, btrfs->root_tree, btrfs->root_fs_tree, "", &file_id)) {
         btrfs_debug_printf("Couldn't find file\n");
-        goto error;
+        goto free_chunks;
     }
 
     btrfs_debug_printf("Found file at: FS_TREE %llu, OBJECTID %llu\n",
@@ -69,7 +69,10 @@ struct btrfs * btrfs_openfs(void * data) {
 
     return btrfs;
 
-error:
+free_chunks:
+    btrfs_chunk_list_delete(btrfs->chunk_list);
+
+free_btrfs:
     free(btrfs);
     return NULL;
 }

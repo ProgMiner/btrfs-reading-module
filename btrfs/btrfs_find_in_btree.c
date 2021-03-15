@@ -51,7 +51,7 @@ static int btrfs_comp_keys(
 static int __btrfs_binary_search(
         void * start,
         size_t count,
-        off_t key_offset,
+        size_t key_offset,
         size_t item_size,
         struct btrfs_key key,
         void ** result

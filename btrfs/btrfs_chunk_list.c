@@ -28,10 +28,6 @@ struct btrfs_chunk_list * btrfs_chunk_list_new(
         return NULL;
     }
 
-    list->key = key;
-    list->chunk = *chunk;
-    list->next = next;
-
     if (num_additional_stripes > 1) {
         list->more_stripes = malloc(num_additional_stripes * sizeof(struct btrfs_stripe));
 
@@ -40,25 +36,29 @@ struct btrfs_chunk_list * btrfs_chunk_list_new(
             return NULL;
         }
 
-        stripe = (struct btrfs_stripe *) ((u8 *) chunk + sizeof(struct btrfs_chunk));
-        for (i = 0; i < num_additional_stripes; ++i) {
+        stripe = (struct btrfs_stripe *) (chunk + 1);
+        for (i = 0; i < num_additional_stripes; ++i, ++stripe) {
             list->more_stripes[i] = *stripe;
-            ++stripe;
         }
+    } else {
+        list->more_stripes = NULL;
     }
 
+    list->key = key;
+    list->chunk = *chunk;
+    list->next = next;
     return list;
 }
 
 void btrfs_chunk_list_delete(struct btrfs_chunk_list * list) {
-    struct btrfs_chunk_list * prev;
+    struct btrfs_chunk_list * next = list;
 
-    while (list) {
-        prev = list;
-        list = prev->next;
+    while (next) {
+        list = next;
+        next = list->next;
 
-        free(prev->more_stripes);
-        free(prev);
+        free(list->more_stripes);
+        free(list);
     }
 }
 

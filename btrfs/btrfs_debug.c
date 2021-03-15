@@ -21,6 +21,7 @@ static char * __btrfs_debug_indent() {
             "                                                                "
             "                                                                "
             "                                                                ";
+
     return strdup(buffer);
 }
 

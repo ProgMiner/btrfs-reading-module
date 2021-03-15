@@ -96,6 +96,7 @@ void btrfs_traverse_btree_do(
     btrfs_debug_printf("---- /btrfs_traverse_btree ----\n");
 }
 
+#ifdef BTRFS_DEBUG
 static enum btrfs_traverse_btree_handler_result btrfs_traverse_btree_print_handler(
         void * acc,
         struct btrfs_key item_key,
@@ -111,3 +112,4 @@ void btrfs_traverse_btree_print(
 ) {
     btrfs_traverse_btree(chunk_list, data, btree_root, NULL, btrfs_traverse_btree_print_handler);
 }
+#endif
