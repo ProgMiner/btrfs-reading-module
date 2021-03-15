@@ -42,7 +42,7 @@ int btrfs_low_locate_file(
         struct btrfs_low_file_id * result
 );
 
-void btrfs_low_stat(
+int btrfs_low_stat(
         struct btrfs_chunk_list * chunk_list,
         void * data,
         struct btrfs_low_file_id file_id,

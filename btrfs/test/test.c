@@ -54,6 +54,17 @@ int main(int argc, const char ** argv) {
 
     /* TODO */
 
+    ret |= btrfs_stat(btrfs, "/", NULL);
+    ret |= btrfs_stat(btrfs, "/f1", NULL);
+    ret |= btrfs_stat(btrfs, "/d1", NULL);
+    ret |= btrfs_stat(btrfs, "/d1/f1", NULL);
+    ret |= btrfs_stat(btrfs, "/ext2_saved", NULL);
+    ret |= btrfs_stat(btrfs, "/ext2_saved/image", NULL);
+
+    if (ret) {
+        ret = -1;
+    }
+
     btrfs_delete(btrfs);
 
 close:

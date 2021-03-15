@@ -61,8 +61,7 @@ static int __btrfs_binary_search(
     u8 * middle_item;
     int rel;
 
-    btrfs_debug_indent();
-    btrfs_debug_printf("----  btrfs_binary_search ----\n");
+    btrfs_debug_start_section("btrfs_binary_search");
 
     btrfs_debug_indent();
     btrfs_debug_printf("Searching key:\n");
@@ -91,8 +90,7 @@ static int __btrfs_binary_search(
         }
     }
 
-    btrfs_debug_indent();
-    btrfs_debug_printf("---- /btrfs_binary_search ----\n");
+    btrfs_debug_end_section("btrfs_binary_search");
 
     if (rel == 0) {
         *result = (u8 *) start + middle * item_size;
@@ -160,8 +158,7 @@ void * btrfs_find_in_btree(
         return NULL;
     }
 
-    btrfs_debug_indent();
-    btrfs_debug_printf("----  btrfs_find_in_btree ----\n");
+    btrfs_debug_start_section("btrfs_find_in_btree");
 
     btrfs_debug_indent();
     btrfs_debug_printf("Searching key:\n");
@@ -195,7 +192,7 @@ void * btrfs_find_in_btree(
         btrfs_debug_printf("item not found\n");
     }
 
-    btrfs_debug_printf("---- /btrfs_find_in_btree ----\n");
+    btrfs_debug_end_section("btrfs_find_in_btree");
 
     if (!found) {
         return 0;

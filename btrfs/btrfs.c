@@ -11,29 +11,38 @@
 
 struct btrfs * btrfs_openfs(void * data) {
     struct btrfs * btrfs = malloc(sizeof(struct btrfs));
-    struct btrfs_low_file_id file_id;
     struct btrfs_super_block * sb;
 
+    btrfs_debug_start_section("btrfs_openfs");
+
     if (!btrfs) {
-        return NULL;
+        btrfs_debug_indent();
+        btrfs_debug_printf("Couldn't allocate memory\n");
+        goto bad_end;
     }
 
     btrfs->data = data;
     sb = btrfs_low_find_superblock(data);
 
     if (!sb) {
+        btrfs_debug_indent();
+        btrfs_debug_printf("Couldn't find superblock\n");
         goto free_btrfs;
     }
 
+    btrfs_debug_indent();
     btrfs_debug_printf("Before reading sys array:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
 
     btrfs->chunk_list = btrfs_low_read_sys_array(sb);
 
+    btrfs_debug_indent();
     btrfs_debug_printf("After reading sys array:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
 
     if (!btrfs->chunk_list) {
+        btrfs_debug_indent();
+        btrfs_debug_printf("Couldn't read sys array\n");
         goto free_btrfs;
     }
 
@@ -43,6 +52,7 @@ struct btrfs * btrfs_openfs(void * data) {
             btrfs_super_block_chunk_root(sb)
     );
 
+    btrfs_debug_indent();
     btrfs_debug_printf("After reading chunk tree:\n");
     btrfs_chunk_list_print(btrfs->chunk_list);
 
@@ -54,27 +64,27 @@ struct btrfs * btrfs_openfs(void * data) {
     );
 
     if (!btrfs->root_fs_tree) {
+        btrfs_debug_indent();
+        btrfs_debug_printf("Couldn't find root FS_TREE root\n");
         goto free_chunks;
     }
 
-    btrfs_debug_printf("Found root FS_TREE root bytenr: %llu\n", btrfs->root_fs_tree);
-
-    if (btrfs_low_locate_file(btrfs->chunk_list, data, btrfs->root_tree, btrfs->root_fs_tree, "", &file_id)) {
-        btrfs_debug_printf("Couldn't find file\n");
-        goto free_chunks;
-    }
-
-    btrfs_debug_printf("Found file at: FS_TREE %llu, OBJECTID %llu\n",
-            file_id.fs_tree, file_id.dir_item);
-
-    return btrfs;
+    btrfs_debug_indent();
+    btrfs_debug_printf("Found root FS_TREE root at bytenr %llu\n", btrfs->root_fs_tree);
+    goto end;
 
 free_chunks:
     btrfs_chunk_list_delete(btrfs->chunk_list);
 
 free_btrfs:
     free(btrfs);
-    return NULL;
+
+bad_end:
+    btrfs = NULL;
+
+end:
+    btrfs_debug_end_section("btrfs_openfs");
+    return btrfs;
 }
 
 void btrfs_delete(struct btrfs * btrfs) {
@@ -83,24 +93,50 @@ void btrfs_delete(struct btrfs * btrfs) {
 }
 
 int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat) {
-    if (stat != NULL) {
-        memset(stat, 0, sizeof(struct stat));
+    struct btrfs_low_file_id file_id;
+    int ret = 0;
+
+    btrfs_debug_start_section("btrfs_stat");
+
+    if (filename[0] != '/') {
+        btrfs_debug_indent();
+        btrfs_debug_printf("Filename isn't starting with /\n");
+        ret = -ENOENT;
+        goto end;
     }
 
-    if (strcmp(filename, "/") == 0) {
-        if (stat != NULL) {
-            stat->st_mode = S_IFDIR | 0755;
-            stat->st_nlink = 2;
-        }
-    } else {
-        if (stat != NULL) {
-            stat->st_mode = S_IFREG | 0444;
-            stat->st_nlink = 1;
-            stat->st_size = strlen("test");
+    filename += 1;
+    if (btrfs_low_locate_file(
+            btrfs->chunk_list,
+            btrfs->data,
+            btrfs->root_tree,
+            btrfs->root_fs_tree,
+            filename,
+            &file_id
+    )) {
+        btrfs_debug_indent();
+        btrfs_debug_printf("Couldn't find file /%s\n", filename);
+        ret = -ENOENT;
+        goto end;
+    }
+
+    btrfs_debug_indent();
+    btrfs_debug_printf("Found file /%s at: FS_TREE %llu, OBJECTID %llu\n",
+            filename, file_id.fs_tree, file_id.dir_item);
+
+    if (stat) {
+        ret = btrfs_low_stat(btrfs->chunk_list, btrfs->data, file_id, stat);
+
+        if (ret) {
+            btrfs_debug_indent();
+            btrfs_debug_printf("Couldn't stat file /%s\n", filename);
+            goto end;
         }
     }
 
-    return 0;
+end:
+    btrfs_debug_end_section("btrfs_stat");
+    return ret;
 }
 
 size_t btrfs_readdir(struct btrfs * btrfs, const char * filename, const char *** buf) {

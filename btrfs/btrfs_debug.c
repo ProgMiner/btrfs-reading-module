@@ -33,7 +33,7 @@ void btrfs_debug_indent() {
     }
 
     buffer[btrfs_debug_indentation] = '\0';
-    printf("%s", buffer);
+    btrfs_debug_printf("%s", buffer);
     buffer[btrfs_debug_indentation] = ' ';
 }
 #else

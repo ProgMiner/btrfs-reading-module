@@ -81,6 +81,7 @@ struct btrfs_chunk_list * btrfs_low_read_chunk_tree(
 ) {
     struct btrfs_chunk_list * result = chunk_list;
 
+    btrfs_debug_indent();
     btrfs_debug_printf("Reading chunk tree:\n");
     btrfs_traverse_btree(chunk_list, data, chunk_root, &result, __btrfs_low_read_chunk_tree_handler);
 
@@ -100,6 +101,7 @@ static u64 btrfs_low_find_tree_root(
         .offset = -1ULL
     };
 
+    btrfs_debug_indent();
     btrfs_debug_printf("Find tree #%llu root:\n", objectid);
     root_item = btrfs_find_in_btree(chunk_list, data, root, key, NULL);
 
@@ -203,5 +205,25 @@ int btrfs_low_locate_file(
 end:
     result->fs_tree = fs_tree;
     result->dir_item = acc.objectid;
+    return 0;
+}
+
+int btrfs_low_stat(
+        struct btrfs_chunk_list * chunk_list,
+        void * data,
+        struct btrfs_low_file_id file_id,
+        struct stat * stat
+) {
+    memset(stat, 0, sizeof(struct stat));
+
+    if (file_id.dir_item == 256) {
+        stat->st_mode = S_IFDIR | 0755;
+        stat->st_nlink = 2;
+    } else {
+        stat->st_mode = S_IFREG | 0444;
+        stat->st_nlink = 1;
+        stat->st_size = 4;
+    }
+
     return 0;
 }

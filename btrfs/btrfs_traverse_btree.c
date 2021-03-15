@@ -90,10 +90,13 @@ void btrfs_traverse_btree_do(
         void * acc,
         btrfs_traverse_btree_handler handler
 ) {
-    btrfs_debug_printf("----  btrfs_traverse_btree ----\n");
+    btrfs_debug_start_section("btrfs_traverse_btree");
+
+    btrfs_debug_indent();
     btrfs_debug_printf("root:\n");
     __btrfs_traverse_btree_do(chunk_list, data, btree_root, acc, handler);
-    btrfs_debug_printf("---- /btrfs_traverse_btree ----\n");
+
+    btrfs_debug_end_section("btrfs_traverse_btree");
 }
 
 #ifdef BTRFS_DEBUG
