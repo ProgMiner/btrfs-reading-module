@@ -203,5 +203,15 @@ int btrfs_readlink(
         char * data,
         size_t length
 ) {
-    return btrfs_read(btrfs, filename, data, length, 0);
+    int ret = btrfs_read(btrfs, filename, data, length, 0);
+
+    if (ret < 0) {
+        return ret;
+    }
+
+    if (ret < length) {
+        data[ret] = '\0';
+    }
+
+    return 0;
 }

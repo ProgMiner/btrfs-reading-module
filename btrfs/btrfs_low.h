@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include "struct/btrfs_super_block.h"
 #include "btrfs_chunk_list.h"

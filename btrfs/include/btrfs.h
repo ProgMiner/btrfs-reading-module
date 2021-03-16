@@ -1,8 +1,8 @@
 #pragma once
 
-#include <stdio.h>
 #include <stddef.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 
 struct btrfs;

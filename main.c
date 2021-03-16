@@ -91,8 +91,7 @@ static int btrfs_fuse_readlink(
         char * buf,
         size_t size
 ) {
-    /* TODO implement */
-    return -ENOSYS;
+    return btrfs_readlink(btrfs, path, buf, size);
 }
 
 static void btrfs_fuse_destroy(void * private_data) {
