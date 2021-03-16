@@ -83,6 +83,15 @@ static int btrfs_fuse_read(
     return size;
 }
 
+static int btrfs_fuse_readlink(
+        const char * path,
+        char * buf,
+        size_t size
+) {
+    /* TODO implement */
+    return -ENOSYS;
+}
+
 static void btrfs_fuse_destroy(void * private_data) {
     (void) private_data;
 
@@ -97,6 +106,7 @@ static struct fuse_operations btrfs_fuse_oper = {
     .readdir    = btrfs_fuse_readdir,
     .open       = btrfs_fuse_open,
     .read       = btrfs_fuse_read,
+    .readlink   = btrfs_fuse_readlink,
     .destroy    = btrfs_fuse_destroy,
 };
 
