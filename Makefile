@@ -26,7 +26,7 @@ clean:
 
 build: $(TARGET)
 
-btrfs/btrfs.a:
+btrfs/libbtrfs.a:
 	@+cd btrfs; make
 
 %.c:

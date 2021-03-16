@@ -7,9 +7,11 @@
 #include "btrfs_find_in_btree.h"
 #include "btrfs_traverse_btree.h"
 #include "struct/btrfs_key_pointer.h"
+#include "struct/btrfs_inode_item.h"
 #include "struct/btrfs_root_item.h"
 #include "struct/btrfs_disk_key.h"
 #include "struct/btrfs_dir_item.h"
+#include "struct/btrfs_timespec.h"
 #include "struct/btrfs_header.h"
 #include "struct/btrfs_chunk.h"
 #include "struct/btrfs_item.h"
@@ -179,6 +181,15 @@ int btrfs_low_locate_file(
         end = find_filename_end(path);
         acc.hash = btrfs_name_hash(path, end - path);
 
+        key.objectid = acc.objectid;
+        key.type = BTRFS_DIR_ITEM_KEY;
+        key.offset = acc.hash;
+
+        /* check is any DIR_ITEM with specified hash exists */
+        if (!btrfs_find_in_btree(chunk_list, data, fs_tree, key, NULL)) {
+            return -ENOENT;
+        }
+
         acc.filename = path;
         acc.filename_length = end - path;
         acc.result = NULL;
@@ -214,16 +225,34 @@ int btrfs_low_stat(
         struct btrfs_low_file_id file_id,
         struct stat * stat
 ) {
+    struct btrfs_inode_item * inode;
+    struct btrfs_key key;
+
+    key.objectid = file_id.dir_item;
+    key.type = BTRFS_INODE_ITEM_KEY;
+    key.offset = 0;
+
+    inode = btrfs_find_in_btree(chunk_list, data, file_id.fs_tree, key, NULL);
+    if (!inode) {
+        return -ENOENT;
+    }
+
     memset(stat, 0, sizeof(struct stat));
 
-    if (file_id.dir_item == 256) {
-        stat->st_mode = S_IFDIR | 0755;
-        stat->st_nlink = 2;
-    } else {
-        stat->st_mode = S_IFREG | 0444;
-        stat->st_nlink = 1;
-        stat->st_size = 4;
-    }
+    stat->st_ino = file_id.dir_item;
+    stat->st_mode = btrfs_inode_item_mode(inode);
+    stat->st_nlink = btrfs_inode_item_nlink(inode);
+    stat->st_uid = btrfs_inode_item_uid(inode);
+    stat->st_gid = btrfs_inode_item_gid(inode);
+    stat->st_rdev = btrfs_inode_item_rdev(inode);
+    stat->st_size = btrfs_inode_item_size(inode);
+    stat->st_blocks = btrfs_inode_item_nbytes(inode) / 512;
+    stat->st_atime = btrfs_timespec_sec(&inode->atime);
+    stat->st_mtime = btrfs_timespec_sec(&inode->mtime);
+    stat->st_ctime = btrfs_timespec_sec(&inode->ctime);
+    stat->st_atimensec = btrfs_timespec_nsec(&inode->atime);
+    stat->st_mtimensec = btrfs_timespec_nsec(&inode->mtime);
+    stat->st_ctimensec = btrfs_timespec_nsec(&inode->ctime);
 
     return 0;
 }

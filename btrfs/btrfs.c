@@ -151,8 +151,10 @@ size_t btrfs_readdir(struct btrfs * btrfs, const char * filename, const char ***
 }
 
 size_t btrfs_read(struct btrfs * btrfs, const char * filename, char ** buf) {
-    char * data = strdup("test");
+    static const char * data = "test";
 
-    *buf = data;
+    *buf = malloc(5);
+    strncpy(*buf, data, 5);
+
     return 5;
 }

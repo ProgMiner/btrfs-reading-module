@@ -2,6 +2,7 @@
 
 #ifdef BTRFS_DEBUG
 #include <string.h>
+#include <stdlib.h>
 
 
 static u8 btrfs_debug_indentation = 0;
@@ -15,14 +16,12 @@ void btrfs_debug_decrease_indent(u8 shift) {
 }
 
 static char * __btrfs_debug_indent() {
-    /* 256 spaces */
-    static char * buffer =
-            "                                                                "
-            "                                                                "
-            "                                                                "
-            "                                                                ";
+    char * buffer = malloc(257);
 
-    return strdup(buffer);
+    memset(buffer, ' ', 256);
+    buffer[256] = '\0';
+
+    return buffer;
 }
 
 void btrfs_debug_indent() {
