@@ -1,16 +1,22 @@
 #pragma once
 
+#include <aio.h>
 #include <stddef.h>
 #include <sys/stat.h>
 
 
 struct btrfs;
 
+/* read btrfs from data */
 struct btrfs * btrfs_openfs(void * data);
+
+/* delete btrfs structure */
 void btrfs_delete(struct btrfs * btrfs);
 
+/* stat file on btrfs or check is it exists (stat = NULL) */
 int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat);
 
+/* get list of files in directory */
 int btrfs_readdir(
         struct btrfs * btrfs,
         const char * filename,
@@ -18,4 +24,11 @@ int btrfs_readdir(
         char *** contents
 );
 
-int btrfs_read(struct btrfs * btrfs, const char * filename, size_t * length, char ** data);
+/* read piece of file contents, returns count of bytes read or error */
+int btrfs_read(
+        struct btrfs * btrfs,
+        const char * filename,
+        char * data,
+        size_t length,
+        off_t offset
+);

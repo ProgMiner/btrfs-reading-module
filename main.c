@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "btrfs.h"
 
@@ -65,29 +66,23 @@ static int btrfs_fuse_read(
         off_t offset,
         struct fuse_file_info * fi
 ) {
-    char * data;
-    int ret = 0;
-    size_t len;
+    int ret = btrfs_read(btrfs, path, buf, size, offset);
+    size_t read_len;
+
     (void) fi;
 
-    ret = btrfs_read(btrfs, path, &len, &data);
-    if (ret) {
-        goto end;
-    }
-
-    if (offset < len) {
-        if (offset + size > len) {
-            size = len - offset;
-        }
-
-        memcpy(buf, data + offset, size);
+    if (ret < 0) {
+        read_len = 0;
     } else {
-        size = 0;
+        read_len = ret;
     }
 
-    free(data);
+    assert(read_len <= size);
 
-end:
+    if (read_len < size) {
+        memset(buf + read_len, 0, size - read_len);
+    }
+
     return ret;
 }
 

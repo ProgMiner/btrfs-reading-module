@@ -14,20 +14,22 @@ TARGET = lab1
 
 OBJECTS = $(SOURCES:%.c=$(BUILDPATH)/%.o)
 
-.PHONY: all build clean
+.PHONY: all build clean libbtrfs
 .SUFFIXES:
 
 all: build
 
 clean:
-	@+cd btrfs; make clean
+	@+cd btrfs; $(MAKE) clean
 	@rm -vrf $(BUILDPATH) 2> /dev/null; true
 	@rm -v $(TARGET) 2> /dev/null; true
 
 build: $(TARGET)
 
-btrfs/libbtrfs.a:
-	@+cd btrfs; make
+libbtrfs:
+	@+cd btrfs; $(MAKE)
+
+btrfs/libbtrfs.a: libbtrfs
 
 %.c:
 

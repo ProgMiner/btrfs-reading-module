@@ -20,6 +20,7 @@ static struct btrfs * btrfs = NULL;
 int main(int argc, const char ** argv) {
     size_t length, i;
     char ** files;
+    char * file;
     int ret = 0;
 
     if (argc < 2) {
@@ -53,8 +54,6 @@ int main(int argc, const char ** argv) {
         ret = -1;
         goto close;
     }
-
-    /* TODO */
 
     ret |= btrfs_stat(btrfs, "/", NULL);
     ret |= btrfs_stat(btrfs, "/f1", NULL);
@@ -98,6 +97,31 @@ int main(int argc, const char ** argv) {
     }
 
     free(files);
+
+    file = calloc(10, sizeof(char));
+    ret = btrfs_read(btrfs, "/f1", file, 10, 0);
+    if (ret < 0) {
+        goto free_btrfs;
+    }
+
+    printf("Read %d bytes from /f1: %s\n", ret, file);
+
+    ret = btrfs_read(btrfs, "/f1", file, 4, 0);
+    if (ret < 0) {
+        goto free_btrfs;
+    }
+
+    printf("Read %d bytes from /f1: %s\n", ret, file);
+
+    ret = btrfs_read(btrfs, "/f1", file, 2, 0);
+    if (ret < 0) {
+        goto free_btrfs;
+    }
+
+    file[ret] = '\0';
+    printf("Read %d bytes from /f1: %s\n", ret, file);
+
+    ret = 0;
 
 free_btrfs:
     btrfs_delete(btrfs);

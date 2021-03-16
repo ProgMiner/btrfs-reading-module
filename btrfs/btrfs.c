@@ -169,12 +169,25 @@ end:
     return ret;
 }
 
-int btrfs_read(struct btrfs * btrfs, const char * filename, size_t * length, char ** buf) {
-    static const char * data = "test";
+int btrfs_read(
+        struct btrfs * btrfs,
+        const char * filename,
+        char * buf,
+        size_t length,
+        off_t offset
+) {
+    static const char * const data = "test";
+    static const size_t data_length = 4;
 
-    *buf = malloc(5);
-    strncpy(*buf, data, 5);
-    *length = 5;
+    if (offset < data_length) {
+        if (offset + length > data_length) {
+            length = data_length - offset;
+        }
 
-    return 0;
+        memcpy(buf, data + offset, length);
+    } else {
+        length = 0;
+    }
+
+    return length;
 }
