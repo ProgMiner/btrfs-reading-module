@@ -69,7 +69,7 @@ static int __btrfs_binary_search(
 
     while (left < right) {
         btrfs_debug_indent();
-        btrfs_debug_printf("Current range: [%lu, %lu)\n", left, right);
+        btrfs_debug_printf("Current range: [%zu, %zu)\n", left, right);
 
         middle = left + (right - left) / 2;
         middle_item = (u8 *) start + middle * item_size;
@@ -78,7 +78,7 @@ static int __btrfs_binary_search(
         rel = btrfs_comp_keys(middle_key, key);
 
         btrfs_debug_indent();
-        btrfs_debug_printf("Comparing with #%lu:\n", middle);
+        btrfs_debug_printf("Comparing with #%zu:\n", middle);
         btrfs_key_print(&middle_key);
 
         if (rel < 0) {

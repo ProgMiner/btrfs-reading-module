@@ -79,7 +79,7 @@ int main(int argc, const char ** argv) {
 
     printf("Root directory contents:\n");
     for (i = 0; i < length; ++i) {
-        printf("%lu. %s\n", i + 1, files[i]);
+        printf("%zu. %s\n", i + 1, files[i]);
         free(files[i]);
     }
 
@@ -92,7 +92,7 @@ int main(int argc, const char ** argv) {
 
     printf("Subvolume root directory contents:\n");
     for (i = 0; i < length; ++i) {
-        printf("%lu. %s\n", i + 1, files[i]);
+        printf("%zu. %s\n", i + 1, files[i]);
         free(files[i]);
     }
 
