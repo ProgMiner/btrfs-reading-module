@@ -61,6 +61,7 @@ int btrfs_low_read(
         struct btrfs_chunk_list * chunk_list,
         void * data,
         struct btrfs_low_file_id file_id,
-        size_t * length,
-        char ** content
+        char * content,
+        size_t length,
+        off_t offset
 );

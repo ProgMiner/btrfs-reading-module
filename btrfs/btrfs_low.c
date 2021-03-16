@@ -387,3 +387,31 @@ free_result:
 end:
     return ret;
 }
+
+int btrfs_low_read(
+        struct btrfs_chunk_list * chunk_list,
+        void * data,
+        struct btrfs_low_file_id file_id,
+        char * buf,
+        size_t length,
+        off_t offset
+) {
+    static const char * const content = "test";
+    static const size_t content_length = 4;
+
+    (void) chunk_list;
+    (void) data;
+    (void) file_id;
+
+    if (offset < content_length) {
+        if (offset + length > content_length) {
+            length = content_length - offset;
+        }
+
+        memcpy(buf, content + offset, length);
+    } else {
+        length = 0;
+    }
+
+    return length;
+}

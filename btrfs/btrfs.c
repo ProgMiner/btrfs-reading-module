@@ -172,22 +172,27 @@ end:
 int btrfs_read(
         struct btrfs * btrfs,
         const char * filename,
-        char * buf,
+        char * data,
         size_t length,
         off_t offset
 ) {
-    static const char * const data = "test";
-    static const size_t data_length = 4;
+    struct btrfs_low_file_id file_id;
+    int ret = 0;
 
-    if (offset < data_length) {
-        if (offset + length > data_length) {
-            length = data_length - offset;
-        }
-
-        memcpy(buf, data + offset, length);
-    } else {
-        length = 0;
+    ret = btrfs_get_file_id(btrfs, filename, &file_id);
+    if (ret) {
+        goto end;
     }
 
-    return length;
+    ret = btrfs_low_read(
+            btrfs->chunk_list,
+            btrfs->data,
+            file_id,
+            data,
+            length,
+            offset
+    );
+
+end:
+    return ret;
 }
