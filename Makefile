@@ -9,7 +9,7 @@ LFLAGS = $(FUSE_LFLAGS)
 
 BUILDPATH = build
 SOURCES = main.c
-HEADERS =
+HEADERS = btrfs/include/btrfs.h
 TARGET = lab1
 
 OBJECTS = $(SOURCES:%.c=$(BUILDPATH)/%.o)

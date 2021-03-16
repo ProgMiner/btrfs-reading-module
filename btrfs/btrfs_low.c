@@ -257,10 +257,11 @@ int btrfs_low_stat(
     return 0;
 }
 
-size_t btrfs_low_list_files(
+int btrfs_low_list_files(
         struct btrfs_chunk_list * chunk_list,
         void * data,
         struct btrfs_low_file_id dir_id,
+        size_t * length,
         const char *** buf
 ) {
     const char ** files = malloc(3 * sizeof(char *));
@@ -270,5 +271,6 @@ size_t btrfs_low_list_files(
     files[2] = "f1";
 
     *buf = files;
-    return 3;
+    *length = 3;
+    return 0;
 }

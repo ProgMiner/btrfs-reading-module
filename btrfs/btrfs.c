@@ -143,32 +143,38 @@ int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat) 
 
     if (stat) {
         ret = btrfs_low_stat(btrfs->chunk_list, btrfs->data, file_id, stat);
-
-        if (ret) {
-            goto end;
-        }
     }
 
 end:
     return ret;
 }
 
-size_t btrfs_readdir(struct btrfs * btrfs, const char * filename, const char *** buf) {
+int btrfs_readdir(
+        struct btrfs * btrfs,
+        const char * filename,
+        size_t * length,
+        const char *** contents
+) {
     struct btrfs_low_file_id file_id;
+    int ret = 0;
 
-    if (btrfs_get_file_id(btrfs, filename, &file_id)) {
-        *buf = NULL;
-        return 0;
+    ret = btrfs_get_file_id(btrfs, filename, &file_id);
+    if (ret) {
+        goto end;
     }
 
-    return btrfs_low_list_files(btrfs->chunk_list, btrfs->data, file_id, buf);
+    ret = btrfs_low_list_files(btrfs->chunk_list, btrfs->data, file_id, length, contents);
+
+end:
+    return ret;
 }
 
-size_t btrfs_read(struct btrfs * btrfs, const char * filename, char ** buf) {
+int btrfs_read(struct btrfs * btrfs, const char * filename, size_t * length, char ** buf) {
     static const char * data = "test";
 
     *buf = malloc(5);
     strncpy(*buf, data, 5);
+    *length = 5;
 
-    return 5;
+    return 0;
 }

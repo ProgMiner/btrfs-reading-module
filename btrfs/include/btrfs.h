@@ -11,5 +11,11 @@ void btrfs_delete(struct btrfs * btrfs);
 
 int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat);
 
-size_t btrfs_readdir(struct btrfs * btrfs, const char * filename, const char *** contents);
-size_t btrfs_read(struct btrfs * btrfs, const char * filename, char ** data);
+int btrfs_readdir(
+        struct btrfs * btrfs,
+        const char * filename,
+        size_t * length,
+        const char *** contents
+);
+
+int btrfs_read(struct btrfs * btrfs, const char * filename, size_t * length, char ** data);

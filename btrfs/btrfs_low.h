@@ -49,16 +49,18 @@ int btrfs_low_stat(
         struct stat * stat
 );
 
-size_t btrfs_low_list_files(
+int btrfs_low_list_files(
         struct btrfs_chunk_list * chunk_list,
         void * data,
         struct btrfs_low_file_id dir_id,
+        size_t * length,
         const char *** files
 );
 
-size_t btrfs_low_read(
+int btrfs_low_read(
         struct btrfs_chunk_list * chunk_list,
         void * data,
         struct btrfs_low_file_id file_id,
+        size_t * length,
         char ** content
 );

@@ -30,14 +30,15 @@ static int btrfs_fuse_readdir(
         struct fuse_file_info * fi
 ) {
     const char ** contents;
-    size_t count = btrfs_readdir(btrfs, path, &contents);
-    size_t i;
+    size_t count, i;
+    int ret = 0;
 
     (void) offset;
     (void) fi;
 
-    if (contents == NULL) {
-        return -ENOENT;
+    ret = btrfs_readdir(btrfs, path, &count, &contents);
+    if (ret) {
+        goto end;
     }
 
     for (i = 0; i < count; ++i) {
@@ -45,7 +46,9 @@ static int btrfs_fuse_readdir(
     }
 
     free(contents);
-    return 0;
+
+end:
+    return ret;
 }
 
 static int btrfs_fuse_open(const char * path, struct fuse_file_info * fi) {
@@ -62,11 +65,13 @@ static int btrfs_fuse_read(
         struct fuse_file_info * fi
 ) {
     char * data;
-    size_t len = btrfs_read(btrfs, path, &data);
+    int ret = 0;
+    size_t len;
     (void) fi;
 
-    if (data == NULL) {
-        return -ENOENT;
+    ret = btrfs_read(btrfs, path, &len, &data);
+    if (ret) {
+        goto end;
     }
 
     if (offset < len) {
@@ -80,7 +85,9 @@ static int btrfs_fuse_read(
     }
 
     free(data);
-    return size;
+
+end:
+    return ret;
 }
 
 static int btrfs_fuse_readlink(
