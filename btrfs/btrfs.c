@@ -196,3 +196,12 @@ int btrfs_read(
 end:
     return ret;
 }
+
+int btrfs_readlink(
+        struct btrfs * btrfs,
+        const char * filename,
+        char * data,
+        size_t length
+) {
+    return btrfs_read(btrfs, filename, data, length, 0);
+}

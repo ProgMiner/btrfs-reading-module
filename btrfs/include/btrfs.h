@@ -32,3 +32,11 @@ int btrfs_read(
         size_t length,
         off_t offset
 );
+
+/* read symlink */
+int btrfs_readlink(
+        struct btrfs * btrfs,
+        const char * filename,
+        char * data,
+        size_t length
+);
