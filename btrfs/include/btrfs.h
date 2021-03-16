@@ -15,7 +15,7 @@ int btrfs_readdir(
         struct btrfs * btrfs,
         const char * filename,
         size_t * length,
-        const char *** contents
+        char *** contents
 );
 
 int btrfs_read(struct btrfs * btrfs, const char * filename, size_t * length, char ** data);

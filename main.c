@@ -29,7 +29,7 @@ static int btrfs_fuse_readdir(
         off_t offset,
         struct fuse_file_info * fi
 ) {
-    const char ** contents;
+    char ** contents;
     size_t count, i;
     int ret = 0;
 
@@ -43,6 +43,7 @@ static int btrfs_fuse_readdir(
 
     for (i = 0; i < count; ++i) {
         filler(buf, contents[i], NULL, 0);
+        free(contents[i]);
     }
 
     free(contents);

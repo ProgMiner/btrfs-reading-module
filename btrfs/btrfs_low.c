@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "btrfs_find_in_btree.h"
@@ -24,6 +25,14 @@ struct __btrfs_low_locate_file_acc {
     const char * filename;
     size_t filename_length;
     struct btrfs_dir_item * result;
+};
+
+struct __btrfs_low_list_files_acc {
+    u64 objectid;
+    char ** result;
+    size_t result_length;
+    size_t result_capacity;
+    int ret;
 };
 
 struct btrfs_super_block * btrfs_low_find_superblock(void * data) {
@@ -226,11 +235,11 @@ int btrfs_low_stat(
         struct stat * stat
 ) {
     struct btrfs_inode_item * inode;
-    struct btrfs_key key;
-
-    key.objectid = file_id.dir_item;
-    key.type = BTRFS_INODE_ITEM_KEY;
-    key.offset = 0;
+    struct btrfs_key key = {
+        .objectid = file_id.dir_item,
+        .type = BTRFS_INODE_ITEM_KEY,
+        .offset = 0
+    };
 
     inode = btrfs_find_in_btree(chunk_list, data, file_id.fs_tree, key, NULL);
     if (!inode) {
@@ -254,7 +263,63 @@ int btrfs_low_stat(
     stat->st_mtimensec = btrfs_timespec_nsec(&inode->mtime);
     stat->st_ctimensec = btrfs_timespec_nsec(&inode->ctime);
 
+    /* because of .. */
+    if (S_ISDIR(stat->st_mode)) {
+        ++stat->st_nlink;
+    }
+
     return 0;
+}
+
+static enum btrfs_traverse_btree_handler_result __btrfs_low_list_files_handler(
+        struct __btrfs_low_list_files_acc * acc,
+        struct btrfs_key item_key,
+        void * item_data
+) {
+    struct btrfs_dir_item * dir_item;
+    char ** new_result;
+    u16 name_len;
+
+    if (item_key.type != BTRFS_DIR_ITEM_KEY) {
+        btrfs_traverse_btree_continue;
+    }
+
+    if (item_key.objectid != acc->objectid) {
+        btrfs_traverse_btree_continue;
+    }
+
+    dir_item = item_data;
+
+    /* bug if capacity < length */
+    assert(acc->result_capacity >= acc->result_length);
+
+    /* if array is full */
+    if (acc->result_capacity == acc->result_length) {
+        /* increase capacity by powers of 2 */
+
+        acc->result_capacity <<= 1;
+        new_result = realloc(acc->result, acc->result_capacity * sizeof(char *));
+
+        if (!new_result) {
+            acc->ret = -ENOMEM;
+            btrfs_traverse_btree_break;
+        }
+
+        acc->result = new_result;
+    }
+
+    name_len = btrfs_dir_item_name_len(dir_item);
+    acc->result[acc->result_length] = malloc((name_len + 1) * sizeof(char));
+    if (!acc->result[acc->result_length]) {
+        acc->ret = -ENOMEM;
+        btrfs_traverse_btree_break;
+    }
+
+    strncpy(acc->result[acc->result_length], (const char *) (dir_item + 1), name_len + 1);
+    acc->result[acc->result_length][name_len] = '\0';
+    ++acc->result_length;
+
+    btrfs_traverse_btree_continue;
 }
 
 int btrfs_low_list_files(
@@ -262,15 +327,63 @@ int btrfs_low_list_files(
         void * data,
         struct btrfs_low_file_id dir_id,
         size_t * length,
-        const char *** buf
+        char *** files
 ) {
-    const char ** files = malloc(3 * sizeof(char *));
+    char ** result = malloc(4 * sizeof(char *));
+    struct __btrfs_low_list_files_acc acc = {
+        .objectid = dir_id.dir_item,
+        .result = result,
+        .result_length = 2,
+        .result_capacity = 4,
+        .ret = 0
+    };
 
-    files[0] = ".";
-    files[1] = "..";
-    files[2] = "f1";
+    int ret = 0;
+    size_t i;
 
-    *buf = files;
-    *length = 3;
-    return 0;
+    if (!result) {
+        return -ENOMEM;
+    }
+
+    result[0] = malloc(2 * sizeof(char));
+    result[1] = malloc(3 * sizeof(char));
+
+    if (!result[0] || !result[1]) {
+        ret = -ENOMEM;
+        goto free_result;
+    }
+
+    strncpy(result[0],  ".", 2 * sizeof(char));
+    strncpy(result[1], "..", 3 * sizeof(char));
+
+    btrfs_traverse_btree(chunk_list, data, dir_id.fs_tree, &acc, __btrfs_low_list_files_handler);
+
+    /* bug if length < capacity */
+    assert(acc.result_length <= acc.result_capacity);
+
+    ret = acc.ret;
+    if (ret) {
+        goto free_result;
+    }
+
+    if (acc.result_length < acc.result_capacity) {
+        /* shrink array size to length */
+
+        result = realloc(acc.result, acc.result_length * sizeof(char *));
+        assert(result != NULL);
+    }
+
+    *files = acc.result;
+    *length = acc.result_length;
+    goto end;
+
+free_result:
+    for (i = 0; i < acc.result_length; ++i) {
+        free(acc.result[i]);
+    }
+
+    free(acc.result);
+
+end:
+    return ret;
 }

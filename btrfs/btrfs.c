@@ -153,7 +153,7 @@ int btrfs_readdir(
         struct btrfs * btrfs,
         const char * filename,
         size_t * length,
-        const char *** contents
+        char *** contents
 ) {
     struct btrfs_low_file_id file_id;
     int ret = 0;

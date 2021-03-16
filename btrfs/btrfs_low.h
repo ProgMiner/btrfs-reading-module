@@ -54,7 +54,7 @@ int btrfs_low_list_files(
         void * data,
         struct btrfs_low_file_id dir_id,
         size_t * length,
-        const char *** files
+        char *** files
 );
 
 int btrfs_low_read(
