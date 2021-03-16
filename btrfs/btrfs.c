@@ -92,16 +92,19 @@ void btrfs_delete(struct btrfs * btrfs) {
     free(btrfs);
 }
 
-int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat) {
-    struct btrfs_low_file_id file_id;
+static int btrfs_get_file_id(
+        struct btrfs * btrfs,
+        const char * filename,
+        struct btrfs_low_file_id * file_id
+) {
     int ret = 0;
 
-    btrfs_debug_start_section("btrfs_stat");
+    btrfs_debug_start_section("btrfs_get_file_id");
 
     if (filename[0] != '/') {
         btrfs_debug_indent();
         btrfs_debug_printf("Filename isn't starting with /\n");
-        ret = -ENOENT;
+        ret = -EINVAL;
         goto end;
     }
 
@@ -112,7 +115,7 @@ int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat) 
             btrfs->root_tree,
             btrfs->root_fs_tree,
             filename,
-            &file_id
+            file_id
     )) {
         btrfs_debug_indent();
         btrfs_debug_printf("Couldn't find file /%s\n", filename);
@@ -122,32 +125,43 @@ int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat) 
 
     btrfs_debug_indent();
     btrfs_debug_printf("Found file /%s at: FS_TREE %llu, OBJECTID %llu\n",
-            filename, file_id.fs_tree, file_id.dir_item);
+            filename, file_id->fs_tree, file_id->dir_item);
+
+end:
+    btrfs_debug_end_section("btrfs_get_file_id");
+    return ret;
+}
+
+int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat) {
+    struct btrfs_low_file_id file_id;
+    int ret = 0;
+
+    ret = btrfs_get_file_id(btrfs, filename, &file_id);
+    if (ret) {
+        goto end;
+    }
 
     if (stat) {
         ret = btrfs_low_stat(btrfs->chunk_list, btrfs->data, file_id, stat);
 
         if (ret) {
-            btrfs_debug_indent();
-            btrfs_debug_printf("Couldn't stat file /%s\n", filename);
             goto end;
         }
     }
 
 end:
-    btrfs_debug_end_section("btrfs_stat");
     return ret;
 }
 
 size_t btrfs_readdir(struct btrfs * btrfs, const char * filename, const char *** buf) {
-    const char ** contents = malloc(3 * sizeof(char *));
+    struct btrfs_low_file_id file_id;
 
-    contents[0] = ".";
-    contents[1] = "..";
-    contents[2] = "hello";
+    if (btrfs_get_file_id(btrfs, filename, &file_id)) {
+        *buf = NULL;
+        return 0;
+    }
 
-    *buf = contents;
-    return 3;
+    return btrfs_low_list_files(btrfs->chunk_list, btrfs->data, file_id, buf);
 }
 
 size_t btrfs_read(struct btrfs * btrfs, const char * filename, char ** buf) {
