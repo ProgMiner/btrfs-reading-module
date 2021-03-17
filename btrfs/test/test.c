@@ -98,20 +98,22 @@ int main(int argc, const char ** argv) {
 
     free(files);
 
-    file = calloc(10, sizeof(char));
+    file = malloc(10 * sizeof(char));
     ret = btrfs_read(btrfs, "/f1", file, 10, 0);
     if (ret < 0) {
         goto free_btrfs;
     }
 
-    printf("Read %d bytes from /f1: %s\n", ret, file);
+    file[ret] = '\0';
+    printf("Read %d bytes from /f1: \"%s\"\n", ret, file);
 
     ret = btrfs_read(btrfs, "/f1", file, 4, 0);
     if (ret < 0) {
         goto free_btrfs;
     }
 
-    printf("Read %d bytes from /f1: %s\n", ret, file);
+    file[ret] = '\0';
+    printf("Read %d bytes from /f1: \"%s\"\n", ret, file);
 
     ret = btrfs_read(btrfs, "/f1", file, 2, 0);
     if (ret < 0) {
@@ -119,8 +121,16 @@ int main(int argc, const char ** argv) {
     }
 
     file[ret] = '\0';
-    printf("Read %d bytes from /f1: %s\n", ret, file);
+    printf("Read %d bytes from /f1: \"%s\"\n", ret, file);
 
+
+    ret = btrfs_read(btrfs, "/f1", file, 2, 2);
+    if (ret < 0) {
+        goto free_btrfs;
+    }
+
+    file[ret] = '\0';
+    printf("Read %d bytes from /f1: \"%s\"\n", ret, file);
     ret = 0;
 
 free_btrfs:

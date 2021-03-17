@@ -101,3 +101,13 @@ struct btrfs_file_extent_item {
      */
     __le64 num_bytes;
 } __attribute__ ((__packed__));
+
+static inline u8 btrfs_file_extent_item_type(struct btrfs_file_extent_item * file_extent_item) {
+    return le8_to_cpu(file_extent_item->type);
+}
+
+static inline u64 btrfs_file_extent_item_ram_bytes(
+        struct btrfs_file_extent_item * file_extent_item
+) {
+    return le64_to_cpu(file_extent_item->ram_bytes);
+}

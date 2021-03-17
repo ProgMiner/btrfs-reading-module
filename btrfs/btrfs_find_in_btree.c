@@ -1,7 +1,6 @@
 #include "btrfs_find_in_btree.h"
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "struct/btrfs_key_pointer.h"
 #include "struct/btrfs_disk_key.h"
@@ -131,22 +130,13 @@ static int btrfs_binary_search(
     }
 }
 
-/* b-tree search
- *
- * if item with specified key is present in tree, returns item and result is set to key,
- * otherwise returns NULL and result is not defined
- *
- * if key.offset == -1ULL finds not exactly key but item with maximal key
- * that obejectid and type is equals to query
- *
- * result can be NULL if you don't need to get key
- */
 void * btrfs_find_in_btree(
         struct btrfs_chunk_list * chunk_list,
         void * data,
         u64 btree_root,
         struct btrfs_key key,
-        struct btrfs_key * result
+        struct btrfs_key * result,
+        bool exact
 ) {
     struct btrfs_header * header = btrfs_chunk_list_resolve(chunk_list, data, btree_root);
     struct btrfs_key_pointer * key_ptr;
@@ -178,7 +168,7 @@ void * btrfs_find_in_btree(
     }
 
     ret = btrfs_binary_search(header, key, (void **) &item);
-    found = ret == 0 || (ret > 0 && key.offset == -1ULL);
+    found = ret == 0 || (ret > 0 && !exact);
 
     if (found) {
         btrfs_debug_indent();

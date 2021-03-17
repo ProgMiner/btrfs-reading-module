@@ -7,6 +7,7 @@
 
 #include "btrfs_find_in_btree.h"
 #include "btrfs_traverse_btree.h"
+#include "struct/btrfs_file_extent_item.h"
 #include "struct/btrfs_key_pointer.h"
 #include "struct/btrfs_inode_item.h"
 #include "struct/btrfs_root_item.h"
@@ -114,7 +115,7 @@ static u64 btrfs_low_find_tree_root(
 
     btrfs_debug_indent();
     btrfs_debug_printf("Find tree #%llu root:\n", objectid);
-    root_item = btrfs_find_in_btree(chunk_list, data, root, key, NULL);
+    root_item = btrfs_find_in_btree(chunk_list, data, root, key, NULL, false);
 
     return root_item ? root_item->bytenr : 0;
 }
@@ -195,7 +196,7 @@ int btrfs_low_locate_file(
         key.offset = acc.hash;
 
         /* check is any DIR_ITEM with specified hash exists */
-        if (!btrfs_find_in_btree(chunk_list, data, fs_tree, key, NULL)) {
+        if (!btrfs_find_in_btree_exact(chunk_list, data, fs_tree, key, NULL)) {
             return -ENOENT;
         }
 
@@ -241,7 +242,7 @@ int btrfs_low_stat(
         .offset = 0
     };
 
-    inode = btrfs_find_in_btree(chunk_list, data, file_id.fs_tree, key, NULL);
+    inode = btrfs_find_in_btree(chunk_list, data, file_id.fs_tree, key, NULL, true);
     if (!inode) {
         return -ENOENT;
     }
@@ -388,6 +389,42 @@ end:
     return ret;
 }
 
+/* read length bytes from extent data starting from offset,
+ * return count of read bytes or error
+ */
+static int __btrfs_low_read(
+        struct btrfs_file_extent_item * extent_data,
+        char * buf,
+        size_t length,
+        size_t offset
+) {
+    const char * data;
+    size_t data_length;
+
+    switch (btrfs_file_extent_item_type(extent_data)) {
+    case BTRFS_FILE_EXTENT_INLINE:
+        data = (void *) &extent_data->disk_bytenr;
+        data_length = btrfs_file_extent_item_ram_bytes(extent_data);
+        break;
+
+    default:
+        /* TODO implement */
+        return -ENOENT;
+    }
+
+    if (offset < data_length) {
+        if (offset + length > data_length) {
+            length = data_length - offset;
+        }
+
+        memcpy(buf, data + offset, length);
+    } else {
+        length = 0;
+    }
+
+    return length;
+}
+
 int btrfs_low_read(
         struct btrfs_chunk_list * chunk_list,
         void * data,
@@ -396,22 +433,46 @@ int btrfs_low_read(
         size_t length,
         off_t offset
 ) {
-    static const char * const content = "test";
-    static const size_t content_length = 4;
+    int ret = 0;
+    size_t bytes_read = 0;
+    struct btrfs_file_extent_item * extent_data;
+    struct btrfs_key key = { .objectid = file_id.dir_item, .type = BTRFS_EXTENT_DATA_KEY };
 
-    (void) chunk_list;
-    (void) data;
-    (void) file_id;
+    while (bytes_read < length) {
+        key.offset = offset;
+        extent_data = btrfs_find_in_btree(chunk_list, data, file_id.fs_tree, key, &key, false);
 
-    if (offset < content_length) {
-        if (offset + length > content_length) {
-            length = content_length - offset;
+        if (extent_data == NULL
+            || key.type != BTRFS_EXTENT_DATA_KEY
+            || key.objectid != file_id.dir_item) {
+            ret = -ENOENT;
+            goto end;
         }
 
-        memcpy(buf, content + offset, length);
-    } else {
-        length = 0;
+        /* bug if we found key with offset > query offset */
+        assert(key.offset <= offset);
+
+        ret = __btrfs_low_read(extent_data, buf, length - bytes_read, offset - key.offset);
+        if (ret < 0) {
+            goto end;
+        }
+
+        /* if we cannot read any bytes, file ended */
+        if (ret == 0) {
+            break;
+        }
+
+        /* bug if we read more than queried bytes */
+        assert(ret <= length - bytes_read);
+
+        offset += ret;
+        bytes_read += ret;
+        buf += ret;
+        ret = 0;
     }
 
-    return length;
+    ret = bytes_read;
+
+end:
+    return ret;
 }
