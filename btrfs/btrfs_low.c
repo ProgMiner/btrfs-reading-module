@@ -36,11 +36,25 @@ struct __btrfs_low_list_files_acc {
     int ret;
 };
 
-struct btrfs_super_block * btrfs_low_find_superblock(void * data) {
-    /* TODO add checking for errors */
-    /* TODO maybe add searching mirrors? */
+struct btrfs_super_block * btrfs_low_find_superblock(void * data, size_t length) {
+    struct btrfs_super_block * sb = (void *) (((u8 *) data) + BTRFS_SUPER_INFO_OFFSET);
 
-    return (void *) (((uint8_t *) data) + BTRFS_SUPER_INFO_OFFSET);
+    /* not enough space for superblock */
+    if (BTRFS_SUPER_INFO_OFFSET + sizeof(struct btrfs_super_block) > length) {
+        return NULL;
+    }
+
+    /* superblock bytenr is not valid */
+    if (btrfs_super_block_bytenr(sb) != BTRFS_SUPER_INFO_OFFSET) {
+        return NULL;
+    }
+
+    /* superblock magic is not match */
+    if (btrfs_super_block_magic(sb) != BTRFS_MAGIC) {
+        return NULL;
+    }
+
+    return sb;
 }
 
 struct btrfs_chunk_list * btrfs_low_read_sys_array(struct btrfs_super_block * sb) {

@@ -6,6 +6,10 @@
 #include "btrfs_root_backup.h"
 
 
+/* ascii _BHRfS_M, no null */
+#define BTRFS_MAGIC 0x4D5F53665248425FULL
+
+
 /*
  * The primary superblock is located at 0x1 0000 (6410 KiB). Mirror copies of the superblock
  * are located at physical addresses 0x400 0000 (6410 MiB), 0x40 0000 0000 (25610 GiB),
@@ -111,4 +115,12 @@ static inline u64 btrfs_super_block_chunk_root(struct btrfs_super_block * super_
 
 static inline u64 btrfs_super_block_root(struct btrfs_super_block * super_block) {
     return le64_to_cpu(super_block->root);
+}
+
+static inline u64 btrfs_super_block_bytenr(struct btrfs_super_block * super_block) {
+    return le64_to_cpu(super_block->bytenr);
+}
+
+static inline u64 btrfs_super_block_magic(struct btrfs_super_block * super_block) {
+    return le64_to_cpu(super_block->magic);
 }

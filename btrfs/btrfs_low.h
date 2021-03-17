@@ -18,7 +18,7 @@ struct btrfs_low_file_id {
     u64 dir_item;
 };
 
-struct btrfs_super_block * btrfs_low_find_superblock(void * data);
+struct btrfs_super_block * btrfs_low_find_superblock(void * data, size_t length);
 
 struct btrfs_chunk_list * btrfs_low_read_sys_array(struct btrfs_super_block * sb);
 

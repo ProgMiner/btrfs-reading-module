@@ -8,7 +8,7 @@
 struct btrfs;
 
 /* read btrfs from data */
-struct btrfs * btrfs_openfs(void * data);
+struct btrfs * btrfs_openfs(void * data, size_t length);
 
 /* delete btrfs structure */
 void btrfs_delete(struct btrfs * btrfs);

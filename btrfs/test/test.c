@@ -48,7 +48,7 @@ int main(int argc, const char ** argv) {
         goto close;
     }
 
-    btrfs = btrfs_openfs(btrfs_data);
+    btrfs = btrfs_openfs(btrfs_data, btrfs_data_length);
     if (!btrfs) {
         fprintf(stderr, "Couldn't init btrfs struct\n");
         ret = -1;

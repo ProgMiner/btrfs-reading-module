@@ -9,7 +9,7 @@
 #include "btrfs_debug.h"
 
 
-struct btrfs * btrfs_openfs(void * data) {
+struct btrfs * btrfs_openfs(void * data, size_t length) {
     struct btrfs * btrfs = malloc(sizeof(struct btrfs));
     struct btrfs_super_block * sb;
 
@@ -22,7 +22,7 @@ struct btrfs * btrfs_openfs(void * data) {
     }
 
     btrfs->data = data;
-    sb = btrfs_low_find_superblock(data);
+    sb = btrfs_low_find_superblock(data, length);
 
     if (!sb) {
         btrfs_debug_indent();
