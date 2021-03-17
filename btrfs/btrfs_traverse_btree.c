@@ -9,13 +9,13 @@
 
 
 static enum btrfs_traverse_btree_handler_result __btrfs_traverse_btree_do(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 btree_root,
         void * acc,
         btrfs_traverse_btree_handler handler
 ) {
-    struct btrfs_header * header = btrfs_chunk_list_resolve(chunk_list, data, btree_root);
+    const struct btrfs_header * header = btrfs_chunk_list_resolve(chunk_list, data, btree_root);
     enum btrfs_traverse_btree_handler_result result = BTRFS_TRAVERSE_BTREE_CONTINUE;
     struct btrfs_key_pointer * key_ptr;
     struct btrfs_item * item;
@@ -84,8 +84,8 @@ static enum btrfs_traverse_btree_handler_result __btrfs_traverse_btree_do(
 }
 
 void btrfs_traverse_btree_do(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 btree_root,
         void * acc,
         btrfs_traverse_btree_handler handler
@@ -103,14 +103,14 @@ void btrfs_traverse_btree_do(
 static enum btrfs_traverse_btree_handler_result btrfs_traverse_btree_print_handler(
         void * acc,
         struct btrfs_key item_key,
-        void * item_data
+        const void * item_data
 ) {
     btrfs_traverse_btree_continue;
 }
 
 void btrfs_traverse_btree_print(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 btree_root
 ) {
     btrfs_traverse_btree(chunk_list, data, btree_root, NULL, btrfs_traverse_btree_print_handler);

@@ -48,16 +48,16 @@ static int btrfs_comp_keys(
  * if that item is not present, returns -1 and result is not defined
  */
 static int __btrfs_binary_search(
-        void * start,
+        const void * start,
         size_t count,
         size_t key_offset,
         size_t item_size,
         struct btrfs_key key,
-        void ** result
+        const void ** result
 ) {
     size_t left = 0, right = count, middle;
     struct btrfs_key middle_key;
-    u8 * middle_item;
+    const u8 * middle_item;
     int rel;
 
     if (right == left) {
@@ -107,9 +107,9 @@ static int __btrfs_binary_search(
 }
 
 static int btrfs_binary_search(
-        struct btrfs_header * node,
+        const struct btrfs_header * node,
         struct btrfs_key key,
-        void ** result
+        const void ** result
 ) {
     u32 nritems = btrfs_header_nritems(node);
 
@@ -134,17 +134,17 @@ static int btrfs_binary_search(
     }
 }
 
-void * btrfs_find_in_btree(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+const void * btrfs_find_in_btree(
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 btree_root,
         struct btrfs_key key,
         struct btrfs_key * result,
         bool exact
 ) {
-    struct btrfs_header * header = btrfs_chunk_list_resolve(chunk_list, data, btree_root);
-    struct btrfs_key_pointer * key_ptr;
-    struct btrfs_item * item;
+    const struct btrfs_header * header = btrfs_chunk_list_resolve(chunk_list, data, btree_root);
+    const struct btrfs_key_pointer * key_ptr;
+    const struct btrfs_item * item;
     bool found;
     int ret;
 
@@ -159,7 +159,7 @@ void * btrfs_find_in_btree(
     btrfs_key_print(&key);
 
     while (btrfs_header_level(header) > 0) {
-        btrfs_binary_search(header, key, (void **) &key_ptr);
+        btrfs_binary_search(header, key, (const void **) &key_ptr);
 
         btrfs_debug_indent();
         btrfs_debug_printf("  - level %u key_pointer:\n", btrfs_header_level(header));
@@ -171,7 +171,7 @@ void * btrfs_find_in_btree(
         header = btrfs_chunk_list_resolve(chunk_list, data, btrfs_key_pointer_blocknr(key_ptr));
     }
 
-    ret = btrfs_binary_search(header, key, (void **) &item);
+    ret = btrfs_binary_search(header, key, (const void **) &item);
     found = ret == 0 || (ret > 0 && !exact);
 
     if (found) {

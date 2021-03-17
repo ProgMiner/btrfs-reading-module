@@ -9,6 +9,23 @@
 /* ascii _BHRfS_M, no null */
 #define BTRFS_MAGIC 0x4D5F53665248425FULL
 
+/*
+ * this is a very generous portion of the super block, giving us
+ * room to translate 14 chunks with 3 stripes each.
+ */
+#define BTRFS_SYSTEM_CHUNK_ARRAY_SIZE 2048
+#define BTRFS_LABEL_SIZE 256
+
+/*
+ * just in case we somehow lose the roots and are not able to mount,
+ * we store an array of the roots from previous transactions
+ * in the super.
+ */
+#define BTRFS_NUM_BACKUP_ROOTS 4
+
+/* 64 KiB */
+#define BTRFS_SUPER_INFO_OFFSET 0x00010000
+
 
 /*
  * The primary superblock is located at 0x1 0000 (6410 KiB). Mirror copies of the superblock
@@ -105,22 +122,24 @@ struct btrfs_super_block {
     struct btrfs_root_backup super_roots[BTRFS_NUM_BACKUP_ROOTS];
 } __attribute__ ((__packed__));
 
-static inline u32 btrfs_super_block_sys_chunk_array_size(struct btrfs_super_block * super_block) {
+static inline u32 btrfs_super_block_sys_chunk_array_size(
+        const struct btrfs_super_block * super_block
+) {
     return le32_to_cpu(super_block->sys_chunk_array_size);
 }
 
-static inline u64 btrfs_super_block_chunk_root(struct btrfs_super_block * super_block) {
+static inline u64 btrfs_super_block_chunk_root(const struct btrfs_super_block * super_block) {
     return le64_to_cpu(super_block->chunk_root);
 }
 
-static inline u64 btrfs_super_block_root(struct btrfs_super_block * super_block) {
+static inline u64 btrfs_super_block_root(const struct btrfs_super_block * super_block) {
     return le64_to_cpu(super_block->root);
 }
 
-static inline u64 btrfs_super_block_bytenr(struct btrfs_super_block * super_block) {
+static inline u64 btrfs_super_block_bytenr(const struct btrfs_super_block * super_block) {
     return le64_to_cpu(super_block->bytenr);
 }
 
-static inline u64 btrfs_super_block_magic(struct btrfs_super_block * super_block) {
+static inline u64 btrfs_super_block_magic(const struct btrfs_super_block * super_block) {
     return le64_to_cpu(super_block->magic);
 }

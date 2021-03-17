@@ -9,9 +9,9 @@
 #include "btrfs_debug.h"
 
 
-struct btrfs * btrfs_openfs(void * data, size_t length) {
+struct btrfs * btrfs_openfs(const void * data, size_t length) {
     struct btrfs * btrfs = malloc(sizeof(struct btrfs));
-    struct btrfs_super_block * sb;
+    const struct btrfs_super_block * sb;
 
     btrfs_debug_start_section("btrfs_openfs");
 
@@ -93,7 +93,7 @@ void btrfs_delete(struct btrfs * btrfs) {
 }
 
 static int btrfs_get_file_id(
-        struct btrfs * btrfs,
+        const struct btrfs * btrfs,
         const char * filename,
         struct btrfs_low_file_id * file_id
 ) {
@@ -132,7 +132,7 @@ end:
     return ret;
 }
 
-int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat) {
+int btrfs_stat(const struct btrfs * btrfs, const char * filename, struct stat * stat) {
     struct btrfs_low_file_id file_id;
     int ret = 0;
 
@@ -150,7 +150,7 @@ end:
 }
 
 int btrfs_readdir(
-        struct btrfs * btrfs,
+        const struct btrfs * btrfs,
         const char * filename,
         size_t * length,
         char *** contents
@@ -170,7 +170,7 @@ end:
 }
 
 int btrfs_read(
-        struct btrfs * btrfs,
+        const struct btrfs * btrfs,
         const char * filename,
         char * data,
         size_t length,
@@ -198,7 +198,7 @@ end:
 }
 
 int btrfs_readlink(
-        struct btrfs * btrfs,
+        const struct btrfs * btrfs,
         const char * filename,
         char * data,
         size_t length

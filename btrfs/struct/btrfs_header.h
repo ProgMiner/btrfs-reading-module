@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../types.h"
+#include "../btrfs_consts.h"
 
 
 /*
@@ -35,10 +36,10 @@ struct btrfs_header {
     u8 level;
 } __attribute__ ((__packed__));
 
-static inline u8 btrfs_header_level(struct btrfs_header * header) {
+static inline u8 btrfs_header_level(const struct btrfs_header * header) {
     return le8_to_cpu(header->level);
 }
 
-static inline u32 btrfs_header_nritems(struct btrfs_header * header) {
+static inline u32 btrfs_header_nritems(const struct btrfs_header * header) {
     return le32_to_cpu(header->nritems);
 }

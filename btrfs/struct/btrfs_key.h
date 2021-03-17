@@ -277,7 +277,7 @@ struct btrfs_key {
 } __attribute__ ((__packed__));
 
 #ifdef BTRFS_DEBUG
-void btrfs_key_print(struct btrfs_key * key);
+void btrfs_key_print(const struct btrfs_key * key);
 #else
 #define btrfs_key_print(__key)
 #endif

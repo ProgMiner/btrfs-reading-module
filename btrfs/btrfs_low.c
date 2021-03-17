@@ -36,8 +36,8 @@ struct __btrfs_low_list_files_acc {
     int ret;
 };
 
-struct btrfs_super_block * btrfs_low_find_superblock(void * data, size_t length) {
-    struct btrfs_super_block * sb = (void *) (((u8 *) data) + BTRFS_SUPER_INFO_OFFSET);
+const struct btrfs_super_block * btrfs_low_find_superblock(const void * data, size_t length) {
+    const struct btrfs_super_block * sb = (void *) (((u8 *) data) + BTRFS_SUPER_INFO_OFFSET);
 
     /* not enough space for superblock */
     if (BTRFS_SUPER_INFO_OFFSET + sizeof(struct btrfs_super_block) > length) {
@@ -57,9 +57,9 @@ struct btrfs_super_block * btrfs_low_find_superblock(void * data, size_t length)
     return sb;
 }
 
-struct btrfs_chunk_list * btrfs_low_read_sys_array(struct btrfs_super_block * sb) {
+struct btrfs_chunk_list * btrfs_low_read_sys_array(const struct btrfs_super_block * sb) {
     u32 length = btrfs_super_block_sys_chunk_array_size(sb);
-    u8 * position = sb->sys_chunk_array;
+    const u8 * position = sb->sys_chunk_array;
     struct btrfs_key key;
 
     struct btrfs_chunk_list * result = NULL, * prev_result;
@@ -101,11 +101,11 @@ static enum btrfs_traverse_btree_handler_result __btrfs_low_read_chunk_tree_hand
 }
 
 struct btrfs_chunk_list * btrfs_low_read_chunk_tree(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 chunk_root
 ) {
-    struct btrfs_chunk_list * result = chunk_list;
+    struct btrfs_chunk_list * result = (struct btrfs_chunk_list *) chunk_list;
 
     btrfs_debug_indent();
     btrfs_debug_printf("Reading chunk tree:\n");
@@ -115,12 +115,12 @@ struct btrfs_chunk_list * btrfs_low_read_chunk_tree(
 }
 
 static u64 btrfs_low_find_tree_root(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 root,
         u64 objectid
 ) {
-    struct btrfs_root_item * root_item;
+    const struct btrfs_root_item * root_item;
     struct btrfs_key key = {
         .objectid = objectid,
         .type = BTRFS_ROOT_ITEM_KEY,
@@ -135,8 +135,8 @@ static u64 btrfs_low_find_tree_root(
 }
 
 u64 btrfs_low_find_root_fs_tree_root(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 root
 ) {
     return btrfs_low_find_tree_root(chunk_list, data, root, BTRFS_FS_TREE_OBJECTID);
@@ -185,8 +185,8 @@ static enum btrfs_traverse_btree_handler_result __btrfs_low_locate_file_handler(
 }
 
 int btrfs_low_locate_file(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 root_tree,
         u64 fs_tree,
         const char * path,
@@ -244,12 +244,12 @@ end:
 }
 
 int btrfs_low_stat(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         struct btrfs_low_file_id file_id,
         struct stat * stat
 ) {
-    struct btrfs_inode_item * inode;
+    const struct btrfs_inode_item * inode;
     struct btrfs_key key = {
         .objectid = file_id.dir_item,
         .type = BTRFS_INODE_ITEM_KEY,
@@ -291,7 +291,7 @@ static enum btrfs_traverse_btree_handler_result __btrfs_low_list_files_handler(
         struct btrfs_key item_key,
         void * item_data
 ) {
-    struct btrfs_dir_item * dir_item;
+    const struct btrfs_dir_item * dir_item;
     char ** new_result;
     u16 name_len;
 
@@ -338,8 +338,8 @@ static enum btrfs_traverse_btree_handler_result __btrfs_low_list_files_handler(
 }
 
 int btrfs_low_list_files(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         struct btrfs_low_file_id dir_id,
         size_t * length,
         char *** files
@@ -407,9 +407,9 @@ end:
  * return count of read bytes or error
  */
 static int __btrfs_low_read(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
-        struct btrfs_file_extent_item * extent_data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
+        const struct btrfs_file_extent_item * extent_data,
         char * buf,
         size_t length,
         size_t offset
@@ -458,8 +458,8 @@ static int __btrfs_low_read(
 }
 
 int btrfs_low_read(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         struct btrfs_low_file_id file_id,
         char * buf,
         size_t length,
@@ -467,7 +467,7 @@ int btrfs_low_read(
 ) {
     int ret = 0;
     size_t bytes_read = 0;
-    struct btrfs_file_extent_item * extent_data;
+    const struct btrfs_file_extent_item * extent_data;
     struct btrfs_key key = { .objectid = file_id.dir_item, .type = BTRFS_EXTENT_DATA_KEY };
 
     while (bytes_read < length) {

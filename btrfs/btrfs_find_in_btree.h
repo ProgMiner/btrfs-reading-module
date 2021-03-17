@@ -21,9 +21,9 @@
  *
  * result can be NULL if you don't need to get key
  */
-void * btrfs_find_in_btree(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+const void * btrfs_find_in_btree(
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 btree_root,
         struct btrfs_key key,
         struct btrfs_key * result,

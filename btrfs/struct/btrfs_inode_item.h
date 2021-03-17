@@ -123,30 +123,30 @@ struct btrfs_inode_item {
     struct btrfs_timespec otime;
 } __attribute__ ((__packed__));
 
-static inline u32 btrfs_inode_item_mode(struct btrfs_inode_item * inode_item) {
+static inline u32 btrfs_inode_item_mode(const struct btrfs_inode_item * inode_item) {
     return le32_to_cpu(inode_item->mode);
 }
 
-static inline u32 btrfs_inode_item_nlink(struct btrfs_inode_item * inode_item) {
+static inline u32 btrfs_inode_item_nlink(const struct btrfs_inode_item * inode_item) {
     return le32_to_cpu(inode_item->nlink);
 }
 
-static inline u32 btrfs_inode_item_uid(struct btrfs_inode_item * inode_item) {
+static inline u32 btrfs_inode_item_uid(const struct btrfs_inode_item * inode_item) {
     return le32_to_cpu(inode_item->uid);
 }
 
-static inline u32 btrfs_inode_item_gid(struct btrfs_inode_item * inode_item) {
+static inline u32 btrfs_inode_item_gid(const struct btrfs_inode_item * inode_item) {
     return le32_to_cpu(inode_item->gid);
 }
 
-static inline u64 btrfs_inode_item_rdev(struct btrfs_inode_item * inode_item) {
+static inline u64 btrfs_inode_item_rdev(const struct btrfs_inode_item * inode_item) {
     return le64_to_cpu(inode_item->rdev);
 }
 
-static inline u64 btrfs_inode_item_size(struct btrfs_inode_item * inode_item) {
+static inline u64 btrfs_inode_item_size(const struct btrfs_inode_item * inode_item) {
     return le64_to_cpu(inode_item->size);
 }
 
-static inline u64 btrfs_inode_item_nbytes(struct btrfs_inode_item * inode_item) {
+static inline u64 btrfs_inode_item_nbytes(const struct btrfs_inode_item * inode_item) {
     return le64_to_cpu(inode_item->nbytes);
 }

@@ -5,7 +5,7 @@
 
 
 #ifdef BTRFS_DEBUG
-void btrfs_item_print(struct btrfs_item * item) {
+void btrfs_item_print(const struct btrfs_item * item) {
     btrfs_disk_key_print(&item->key);
 
     btrfs_debug_indent();

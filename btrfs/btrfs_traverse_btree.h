@@ -20,12 +20,12 @@ enum btrfs_traverse_btree_handler_result {
 typedef enum btrfs_traverse_btree_handler_result (* btrfs_traverse_btree_handler)(
         void * acc,
         struct btrfs_key item_key,
-        void * item_data
+        const void * item_data
 );
 
 void btrfs_traverse_btree_do(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 btree_root,
         void * acc,
         btrfs_traverse_btree_handler handler
@@ -33,8 +33,8 @@ void btrfs_traverse_btree_do(
 
 #ifdef BTRFS_DEBUG
 void btrfs_traverse_btree_print(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 btree_root
 );
 #else

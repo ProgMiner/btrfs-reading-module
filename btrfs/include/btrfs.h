@@ -8,17 +8,17 @@
 struct btrfs;
 
 /* read btrfs from data */
-struct btrfs * btrfs_openfs(void * data, size_t length);
+struct btrfs * btrfs_openfs(const void * data, size_t length);
 
 /* delete btrfs structure */
 void btrfs_delete(struct btrfs * btrfs);
 
 /* stat file on btrfs or check is it exists (stat = NULL) */
-int btrfs_stat(struct btrfs * btrfs, const char * filename, struct stat * stat);
+int btrfs_stat(const struct btrfs * btrfs, const char * filename, struct stat * stat);
 
 /* get list of files in directory */
 int btrfs_readdir(
-        struct btrfs * btrfs,
+        const struct btrfs * btrfs,
         const char * filename,
         size_t * length,
         char *** contents
@@ -26,7 +26,7 @@ int btrfs_readdir(
 
 /* read piece of file contents, returns count of bytes read or error */
 int btrfs_read(
-        struct btrfs * btrfs,
+        const struct btrfs * btrfs,
         const char * filename,
         char * data,
         size_t length,
@@ -35,7 +35,7 @@ int btrfs_read(
 
 /* read symlink */
 int btrfs_readlink(
-        struct btrfs * btrfs,
+        const struct btrfs * btrfs,
         const char * filename,
         char * data,
         size_t length

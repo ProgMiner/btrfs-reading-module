@@ -42,14 +42,17 @@ struct btrfs_disk_key {
     __le64 offset;
 } __attribute__ ((__packed__));
 
-static inline void btrfs_disk_key_to_cpu(struct btrfs_key * cpu, struct btrfs_disk_key * disk) {
+static inline void btrfs_disk_key_to_cpu(
+        struct btrfs_key * cpu,
+        const struct btrfs_disk_key * disk
+) {
     cpu->offset = le64_to_cpu(disk->offset);
     cpu->type = disk->type;
     cpu->objectid = le64_to_cpu(disk->objectid);
 }
 
 #ifdef BTRFS_DEBUG
-void btrfs_disk_key_print(struct btrfs_disk_key * disk_key);
+void btrfs_disk_key_print(const struct btrfs_disk_key * disk_key);
 #else
 #define btrfs_disk_key_print(__disk_key)
 #endif

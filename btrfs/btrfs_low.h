@@ -18,25 +18,25 @@ struct btrfs_low_file_id {
     u64 dir_item;
 };
 
-struct btrfs_super_block * btrfs_low_find_superblock(void * data, size_t length);
+const struct btrfs_super_block * btrfs_low_find_superblock(const void * data, size_t length);
 
-struct btrfs_chunk_list * btrfs_low_read_sys_array(struct btrfs_super_block * sb);
+struct btrfs_chunk_list * btrfs_low_read_sys_array(const struct btrfs_super_block * sb);
 
 struct btrfs_chunk_list * btrfs_low_read_chunk_tree(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 chunk_root
 );
 
 u64 btrfs_low_find_root_fs_tree_root(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 root
 );
 
 int btrfs_low_locate_file(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         u64 root_tree,
         u64 fs_tree,
         const char * path,
@@ -44,23 +44,23 @@ int btrfs_low_locate_file(
 );
 
 int btrfs_low_stat(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         struct btrfs_low_file_id file_id,
         struct stat * stat
 );
 
 int btrfs_low_list_files(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         struct btrfs_low_file_id dir_id,
         size_t * length,
         char *** files
 );
 
 int btrfs_low_read(
-        struct btrfs_chunk_list * chunk_list,
-        void * data,
+        const struct btrfs_chunk_list * chunk_list,
+        const void * data,
         struct btrfs_low_file_id file_id,
         char * content,
         size_t length,

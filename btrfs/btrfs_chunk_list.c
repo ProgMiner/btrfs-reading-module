@@ -16,7 +16,7 @@ struct btrfs_chunk_list {
 
 struct btrfs_chunk_list * btrfs_chunk_list_new(
         struct btrfs_key key,
-        struct btrfs_chunk * chunk,
+        const struct btrfs_chunk * chunk,
         struct btrfs_chunk_list * next
 ) {
     struct btrfs_chunk_list * list = malloc(sizeof(struct btrfs_chunk_list));
@@ -63,8 +63,8 @@ void btrfs_chunk_list_delete(struct btrfs_chunk_list * list) {
 }
 
 static void * btrfs_chunk_list_resolve_stripe(
-        struct btrfs_chunk_list * list,
-        void * data,
+        const struct btrfs_chunk_list * list,
+        const void * data,
         u64 offset
 ) {
     u64 stripe_len = btrfs_chunk_stripe_len(&list->chunk);
@@ -73,7 +73,7 @@ static void * btrfs_chunk_list_resolve_stripe(
     u64 stripe_number = offset / stripe_len;
     u64 logical_offset = offset - (stripe_number * stripe_len);
 
-    struct btrfs_stripe * stripe;
+    const struct btrfs_stripe * stripe;
 
     u64 stripe_index = stripe_number % num_stripes;
     stripe_number = stripe_number / num_stripes;
@@ -87,7 +87,11 @@ static void * btrfs_chunk_list_resolve_stripe(
     return (u8 *) data + btrfs_stripe_offset(stripe) + logical_offset + stripe_number * stripe_len;
 }
 
-void * btrfs_chunk_list_resolve(struct btrfs_chunk_list * list, void * data, u64 logical) {
+const void * btrfs_chunk_list_resolve(
+        const struct btrfs_chunk_list * list,
+        const void * data,
+        u64 logical
+) {
     u64 chunk_offset, logical_chunk_offset;
 
     for (; list; list = list->next) {
@@ -113,13 +117,13 @@ void * btrfs_chunk_list_resolve(struct btrfs_chunk_list * list, void * data, u64
 }
 
 #ifdef BTRFS_DEBUG
-static inline void btrfs_chunk_list_print_stripe(struct btrfs_stripe * stripe) {
+static inline void btrfs_chunk_list_print_stripe(const struct btrfs_stripe * stripe) {
     btrfs_debug_indent();
     btrfs_debug_printf("    - stripe %llu:%llu\n",
             btrfs_stripe_devid(stripe), btrfs_stripe_offset(stripe));
 }
 
-void btrfs_chunk_list_print(struct btrfs_chunk_list * list) {
+void btrfs_chunk_list_print(const struct btrfs_chunk_list * list) {
     u16 num_additional_stripes;
     u64 logical, length;
     u32 i;

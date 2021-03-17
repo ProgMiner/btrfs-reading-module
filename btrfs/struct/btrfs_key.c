@@ -82,7 +82,7 @@ static void btrfs_key_print_type(u64 type) {
     btrfs_debug_printf("%llu", type);
 }
 
-void btrfs_key_print(struct btrfs_key * key) {
+void btrfs_key_print(const struct btrfs_key * key) {
     btrfs_debug_indent();
 
     btrfs_debug_printf("(");

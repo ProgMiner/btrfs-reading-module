@@ -10,16 +10,16 @@ struct btrfs_item {
     __le32 size;
 } __attribute__ ((__packed__));
 
-static inline u32 btrfs_item_offset(struct btrfs_item * item) {
+static inline u32 btrfs_item_offset(const struct btrfs_item * item) {
     return le32_to_cpu(item->offset);
 }
 
-static inline u32 btrfs_item_size(struct btrfs_item * item) {
+static inline u32 btrfs_item_size(const struct btrfs_item * item) {
     return le32_to_cpu(item->size);
 }
 
 #ifdef BTRFS_DEBUG
-void btrfs_item_print(struct btrfs_item * item);
+void btrfs_item_print(const struct btrfs_item * item);
 #else
 #define btrfs_item_print(__item)
 #endif

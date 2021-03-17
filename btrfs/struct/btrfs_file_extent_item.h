@@ -102,18 +102,20 @@ struct btrfs_file_extent_item {
     __le64 num_bytes;
 } __attribute__ ((__packed__));
 
-static inline u8 btrfs_file_extent_item_type(struct btrfs_file_extent_item * file_extent_item) {
+static inline u8 btrfs_file_extent_item_type(
+        const struct btrfs_file_extent_item * file_extent_item
+) {
     return le8_to_cpu(file_extent_item->type);
 }
 
 static inline u64 btrfs_file_extent_item_ram_bytes(
-        struct btrfs_file_extent_item * file_extent_item
+        const struct btrfs_file_extent_item * file_extent_item
 ) {
     return le64_to_cpu(file_extent_item->ram_bytes);
 }
 
 static inline u64 btrfs_file_extent_item_disk_bytenr(
-        struct btrfs_file_extent_item * file_extent_item
+        const struct btrfs_file_extent_item * file_extent_item
 ) {
     return le64_to_cpu(file_extent_item->disk_bytenr);
 }

@@ -5,7 +5,7 @@
 
 
 #ifdef BTRFS_DEBUG
-void btrfs_key_pointer_print(struct btrfs_key_pointer * key_pointer) {
+void btrfs_key_pointer_print(const struct btrfs_key_pointer * key_pointer) {
     btrfs_disk_key_print(&key_pointer->key);
 
     btrfs_debug_indent();
