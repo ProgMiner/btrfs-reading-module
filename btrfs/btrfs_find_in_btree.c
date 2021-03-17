@@ -60,6 +60,10 @@ static int __btrfs_binary_search(
     u8 * middle_item;
     int rel;
 
+    if (right == left) {
+        return -1;
+    }
+
     btrfs_debug_start_section("btrfs_binary_search");
 
     btrfs_debug_indent();

@@ -16,7 +16,7 @@ static enum btrfs_traverse_btree_handler_result __btrfs_traverse_btree_do(
         btrfs_traverse_btree_handler handler
 ) {
     struct btrfs_header * header = btrfs_chunk_list_resolve(chunk_list, data, btree_root);
-    enum btrfs_traverse_btree_handler_result result;
+    enum btrfs_traverse_btree_handler_result result = BTRFS_TRAVERSE_BTREE_CONTINUE;
     struct btrfs_key_pointer * key_ptr;
     struct btrfs_item * item;
     struct btrfs_key key_buf;

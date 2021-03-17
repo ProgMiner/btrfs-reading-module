@@ -1,6 +1,6 @@
 CC = gcc
 LD = gcc
-CFLAGS = -std=c11 -pedantic-errors -Wall -Werror -DBTRFS_DEBUG -g -O0 # -O2
+CFLAGS = -std=c11 -pedantic-errors -Wall -Werror -O2 # -DBTRFS_DEBUG -g -O0
 LFLAGS =
 
 BUILDPATH = build
