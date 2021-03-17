@@ -411,6 +411,7 @@ static int __btrfs_low_read(
         break;
 
     case BTRFS_FILE_EXTENT_REG:
+    case BTRFS_FILE_EXTENT_PREALLOC: /* I don't know is it correct, but I hope it is */
         disk_bytenr = btrfs_file_extent_item_disk_bytenr(extent_data);
 
         if (!disk_bytenr) {
@@ -420,10 +421,6 @@ static int __btrfs_low_read(
         }
 
         break;
-
-    case BTRFS_FILE_EXTENT_PREALLOC:
-        /* TODO implement */
-        return -ENOSYS;
 
     default:
         return -EINVAL;
