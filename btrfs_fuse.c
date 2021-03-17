@@ -113,9 +113,18 @@ static struct fuse_operations btrfs_fuse_oper = {
     .destroy  = btrfs_fuse_destroy,
 };
 
-int btrfs_fuse_main(const char * filename, int argc, char * argv[]) {
-    btrfs_fd = open(filename, 0, O_RDONLY);
+static int btrfs_fuse_help() {
+    const char * argv[] = { "<executable file> <BTRFS image>", "-h" };
 
+    return fuse_main(2, (char **) argv, &btrfs_fuse_oper, NULL);
+}
+
+int btrfs_fuse_main(const char * filename, int argc, char * argv[]) {
+    if (!filename) {
+        return btrfs_fuse_help();
+    }
+
+    btrfs_fd = open(filename, 0, O_RDONLY);
     if (btrfs_fd < 0) {
         perror("Cannot open file");
         return -errno;
@@ -123,7 +132,7 @@ int btrfs_fuse_main(const char * filename, int argc, char * argv[]) {
 
     btrfs_data_length = lseek64(btrfs_fd, 0, SEEK_END);
     if (btrfs_data_length < 0) {
-        perror("Cannot open file");
+        perror("Cannot get file size");
         return -errno;
     }
 
