@@ -111,3 +111,9 @@ static inline u64 btrfs_file_extent_item_ram_bytes(
 ) {
     return le64_to_cpu(file_extent_item->ram_bytes);
 }
+
+static inline u64 btrfs_file_extent_item_disk_bytenr(
+        struct btrfs_file_extent_item * file_extent_item
+) {
+    return le64_to_cpu(file_extent_item->disk_bytenr);
+}

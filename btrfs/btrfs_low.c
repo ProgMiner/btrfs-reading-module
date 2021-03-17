@@ -264,7 +264,7 @@ int btrfs_low_stat(
     stat->st_mtimensec = btrfs_timespec_nsec(&inode->mtime);
     stat->st_ctimensec = btrfs_timespec_nsec(&inode->ctime);
 
-    /* because of .. */
+    /* because of ".." */
     if (S_ISDIR(stat->st_mode)) {
         ++stat->st_nlink;
     }
@@ -393,31 +393,52 @@ end:
  * return count of read bytes or error
  */
 static int __btrfs_low_read(
+        struct btrfs_chunk_list * chunk_list,
+        void * data,
         struct btrfs_file_extent_item * extent_data,
         char * buf,
         size_t length,
         size_t offset
 ) {
-    const char * data;
-    size_t data_length;
+    /* because we aren't working with compression */
+    size_t src_length = btrfs_file_extent_item_ram_bytes(extent_data);
+    const char * src;
+    u64 disk_bytenr;
 
     switch (btrfs_file_extent_item_type(extent_data)) {
     case BTRFS_FILE_EXTENT_INLINE:
-        data = (void *) &extent_data->disk_bytenr;
-        data_length = btrfs_file_extent_item_ram_bytes(extent_data);
+        src = (void *) &extent_data->disk_bytenr;
         break;
 
-    default:
-        /* TODO implement */
-        return -ENOENT;
-    }
+    case BTRFS_FILE_EXTENT_REG:
+        disk_bytenr = btrfs_file_extent_item_disk_bytenr(extent_data);
 
-    if (offset < data_length) {
-        if (offset + length > data_length) {
-            length = data_length - offset;
+        if (!disk_bytenr) {
+            src = NULL;
+        } else {
+            src = btrfs_chunk_list_resolve(chunk_list, data, disk_bytenr);
         }
 
-        memcpy(buf, data + offset, length);
+        break;
+
+    case BTRFS_FILE_EXTENT_PREALLOC:
+        /* TODO implement */
+        return -ENOSYS;
+
+    default:
+        return -EINVAL;
+    }
+
+    if (offset < src_length) {
+        if (offset + length > src_length) {
+            length = src_length - offset;
+        }
+
+        if (src) {
+            memcpy(buf, src + offset, length);
+        } else {
+            memset(buf, 0, length);
+        }
     } else {
         length = 0;
     }
@@ -452,7 +473,15 @@ int btrfs_low_read(
         /* bug if we found key with offset > query offset */
         assert(key.offset <= offset);
 
-        ret = __btrfs_low_read(extent_data, buf, length - bytes_read, offset - key.offset);
+        ret = __btrfs_low_read(
+                chunk_list,
+                data,
+                extent_data,
+                buf,
+                length - bytes_read,
+                offset - key.offset
+        );
+
         if (ret < 0) {
             goto end;
         }
