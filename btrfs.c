@@ -18,6 +18,7 @@ struct btrfs * btrfs_openfs(const void * data, size_t length) {
     if (!btrfs) {
         btrfs_debug_indent();
         btrfs_debug_printf("Couldn't allocate memory\n");
+        errno = ENOMEM;
         goto bad_end;
     }
 
@@ -27,6 +28,7 @@ struct btrfs * btrfs_openfs(const void * data, size_t length) {
     if (!sb) {
         btrfs_debug_indent();
         btrfs_debug_printf("Couldn't find superblock\n");
+        errno = EINVAL;
         goto free_btrfs;
     }
 
@@ -43,6 +45,7 @@ struct btrfs * btrfs_openfs(const void * data, size_t length) {
     if (!btrfs->chunk_list) {
         btrfs_debug_indent();
         btrfs_debug_printf("Couldn't read sys array\n");
+        errno = EIO;
         goto free_btrfs;
     }
 
@@ -66,6 +69,7 @@ struct btrfs * btrfs_openfs(const void * data, size_t length) {
     if (!btrfs->root_fs_tree) {
         btrfs_debug_indent();
         btrfs_debug_printf("Couldn't find root FS_TREE root\n");
+        errno = EIO;
         goto free_chunks;
     }
 

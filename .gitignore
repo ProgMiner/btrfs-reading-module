@@ -1,5 +1,6 @@
 /build
 /libbtrfs.a
+/libbtrfs.so
 /test/test
 
 testfs

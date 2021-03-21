@@ -4,9 +4,11 @@ CFLAGS = -std=c99 -pedantic-errors -Wall -Werror -O2 # -DBTRFS_DEBUG -g -O0
 LFLAGS =
 
 BUILDPATH = build
+
 SOURCES = btrfs.c btrfs_low.c btrfs_chunk_list.c btrfs_traverse_btree.c btrfs_debug.c \
 		btrfs_find_in_btree.c lib/crc32c.c \
 		struct/btrfs_disk_key.c struct/btrfs_key.c struct/btrfs_key_pointer.c struct/btrfs_item.c
+
 HEADERS = include/btrfs.h btrfs.h btrfs_low.h types.h btrfs_chunk_list.h btrfs_debug.h \
 		btrfs_traverse_btree.h btrfs_find_in_btree.h lib/crc32c.h \
 		struct/btrfs_block_group_item.h struct/btrfs_chunk.h struct/btrfs_csum_item.h \
@@ -22,7 +24,10 @@ HEADERS = include/btrfs.h btrfs.h btrfs_low.h types.h btrfs_chunk_list.h btrfs_d
 		struct/btrfs_super_block.h struct/btrfs_timespec.h struct/btrfs_tree_block_info.h \
 		struct/btrfs_qgroup_status_item.h struct/btrfs_qgroup_info_item.h \
 		struct/btrfs_qgroup_limit_item.h struct/btrfs_key_pointer.h struct/btrfs_item.h
-TARGET = libbtrfs.a
+
+TARGET_A = libbtrfs.a
+TARGET_SO = libbtrfs.so
+TARGET = $(TARGET_A) $(TARGET_SO)
 
 TEST_SOURCES = test/test.c
 TEST_TARGET = test/test
@@ -54,8 +59,11 @@ $(TEST_OBJECTS): $(BUILDPATH)/%.o : %.c $(HEADERS)
 	@mkdir -p $(@D)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(TARGET): $(OBJECTS)
+$(TARGET_A): $(OBJECTS)
 	ar rcs $@ $^
+
+$(TARGET_SO): $(OBJECTS)
+	$(LD) -shared -o $@ $^ $(LFLAGS)
 
 $(TEST_TARGET): $(TEST_OBJECTS) $(TARGET)
 	$(LD) -o $@ $^ $(LFLAGS)
